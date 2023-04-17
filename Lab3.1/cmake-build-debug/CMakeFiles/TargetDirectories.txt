@@ -1,0 +1,3 @@
+C:/Users/Daniil/CLionProjects/The second semester/Lab3.1/cmake-build-debug/CMakeFiles/Lab3_1.dir
+C:/Users/Daniil/CLionProjects/The second semester/Lab3.1/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Daniil/CLionProjects/The second semester/Lab3.1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
