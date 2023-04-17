@@ -15,7 +15,16 @@ double** randm (int n) {
   return matrix;
 
 }
+double **mulmr (double coef, double** matrix, int n) {
+  for (int i = 0; i <n; i++) {
+    for (int j = 0; j <n; j++) {
+      matrix[i][j] *= coef;
+      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
+    }
+  }
+  return matrix;
+}
 int main ()
 {
   printf("Hello");
-};
+}
