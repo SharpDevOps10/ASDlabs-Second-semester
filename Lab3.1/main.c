@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-double** randm (int n) {
-  srand(2220);
+double ** createMatrix (int n) {
   double** matrix = (double**) malloc(sizeof(double*) * n);
   for (int i = 0; i < n; i++) {
-    matrix[i] = (double*) malloc(sizeof(double)*n);
+    matrix[i] = (double*) malloc(sizeof(double) * n);
   }
+  return matrix;
+}
+double** randm (int n) {
+  srand(2220);
+  double** matrix = createMatrix(n);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j <n; j++) {
       matrix[i][j] = (double)(rand() *2.0)/ (double)RAND_MAX;
@@ -24,6 +28,18 @@ double **mulmr (double coef, double** matrix, int n) {
   }
   return matrix;
 }
+
+
+double** symmetricMatrix(int n) {
+  double** symmetric = createMatrix(n);
+  for (int i = 0; i <n; i++) {
+    for (int j = 0; j <n; j++) {
+      if (symmetric[i][j] == 1) symmetric[j][i] = 1;
+    }
+  }
+  return symmetric;
+}
+
 int main ()
 {
   printf("Hello");
