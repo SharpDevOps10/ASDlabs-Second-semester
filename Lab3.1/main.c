@@ -142,6 +142,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   }
 }
 
+void arrow(double fi, double px, double py, HDC hdc)
+{
+  double lx, ly, rx, ry;
+  lx = px + 15 * cos(fi + 0.3);
+  rx = px + 15 * cos(fi - 0.3);
+  ly = py + 15 * sin(fi + 0.3);
+  ry = py + 15 * sin(fi - 0.3);
+  MoveToEx(hdc, lx, ly, NULL);
+  LineTo(hdc, px, py);
+  LineTo(hdc, rx, ry);
+}
+
+
 
 double **createMatrix(int n) {
   double **matrix = (double **) malloc(sizeof(double *) * n);
