@@ -12,11 +12,12 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char ProgName[] = "Lab 3";
 
 struct coordinates {
-    double nx[vertices];
-    double ny[vertices];
-    double loopX[vertices];
-    double loopY[vertices];
+  double nx[vertices];
+  double ny[vertices];
+  double loopX[vertices];
+  double loopY[vertices];
 };
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
@@ -128,6 +129,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       double circleCenterX = 450;
       double circleCenterY = 450;
 
+      double dtx = vertexRadius / 2.5;
+
       double angleAlpha = 2.0 * M_PI / (double) vertices;
       for (int i = 0; i < vertices; i++) {
         double sinAlpha = sin(angleAlpha * (double) i);
@@ -139,11 +142,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       }
 
 
+
   }
 }
-
-void arrow(double fi, double px, double py, HDC hdc)
-{
+void arrow(double fi, double px, double py, HDC hdc) {
   double lx, ly, rx, ry;
   lx = px + 15 * cos(fi + 0.3);
   rx = px + 15 * cos(fi - 0.3);
@@ -153,7 +155,6 @@ void arrow(double fi, double px, double py, HDC hdc)
   LineTo(hdc, px, py);
   LineTo(hdc, rx, ry);
 }
-
 
 
 double **createMatrix(int n) {
@@ -203,7 +204,16 @@ void freeMatrix(double **matrix, int n) {
   }
   free(matrix);
 }
-
-int main() {
-  printf("Hello");
+void printMatrix(double** matrix, int n, int initialX, int initialY, HDC hdc)
+{
+  for (int i = 0, y = initialY + 30; i < n; i++, y += 15)
+  {
+    for (int j = 0, x = initialX; j < n; j++, x += 13)
+    {
+      wchar_t buffer[2];
+      swprintf(buffer, 2, L"%lf", matrix[i][j]);
+      TextOut(hdc, x, y, (LPCSTR) buffer, 1);
+    }
+    MoveToEx(hdc, initialX, y, NULL);
+  }
 }
