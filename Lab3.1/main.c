@@ -17,6 +17,66 @@ struct coordinates {
   double loopX[vertices];
   double loopY[vertices];
 };
+double **createMatrix(int n) {
+  double **matrix = (double **) malloc(sizeof(double *) * n);
+  for (int i = 0; i < n; i++) {
+    matrix[i] = (double *) malloc(sizeof(double) * n);
+  }
+  return matrix;
+}
+
+double **randm(int n) {
+  srand(2220);
+  double **matrix = createMatrix(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
+    }
+  }
+  return matrix;
+
+}
+
+double **mulmr(double coef, double **matrix, int n) {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] *= coef;
+      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
+    }
+  }
+  return matrix;
+}
+
+
+double **symmetricMatrix(int n) {
+  double **symmetric = createMatrix(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (symmetric[i][j] == 1) symmetric[j][i] = 1;
+    }
+  }
+  return symmetric;
+}
+
+void freeMatrix(double **matrix, int n) {
+  for (int i = 0; i < n; ++i) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+void printMatrix(double** matrix, int n, int initialX, int initialY, HDC hdc)
+{
+  for (int i = 0, y = initialY + 30; i < n; i++, y += 15)
+  {
+    for (int j = 0, x = initialX; j < n; j++, x += 13)
+    {
+      wchar_t buffer[2];
+      swprintf(buffer, 2, L"%lf", matrix[i][j]);
+      TextOut(hdc, x, y, (LPCSTR) buffer, 1);
+    }
+    MoveToEx(hdc, initialX, y, NULL);
+  }
+}
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
@@ -37,7 +97,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      L"Lab 3. Made by Daniil Timofeev",
+                      (LPCSTR) L"Lab 3. Made by Daniil Timofeev",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
@@ -64,8 +124,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   switch (messg) {
     case WM_CREATE: {
       hwndButton_direct = CreateWindow(
-              L"BUTTON",
-              L"Directed graph",
+              (LPCSTR) L"BUTTON",
+              (LPCSTR) L"Directed graph",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               50,
@@ -76,8 +136,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
       hwndButton_undirect = CreateWindow(
-              L"BUTTON",
-              L"Undirected graph",
+              (LPCSTR) L"BUTTON",
+              (LPCSTR) L"Undirected graph",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               125,
@@ -143,6 +203,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
 
+      double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
+      double** T = randm(vertices);
+      double** A = mulmr(coefficient, T, vertices);
+
+      int initialXOofRandMatrix = 750;
+      int initialYofRandMatrix = 150;
+      TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
+      printMatrix(A, vertices, initialXOofRandMatrix,initialYofRandMatrix, hdc);
+
+
+
   }
 }
 void arrow(double fi, double px, double py, HDC hdc) {
@@ -157,63 +228,3 @@ void arrow(double fi, double px, double py, HDC hdc) {
 }
 
 
-double **createMatrix(int n) {
-  double **matrix = (double **) malloc(sizeof(double *) * n);
-  for (int i = 0; i < n; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * n);
-  }
-  return matrix;
-}
-
-double **randm(int n) {
-  srand(2220);
-  double **matrix = createMatrix(n);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
-    }
-  }
-  return matrix;
-
-}
-
-double **mulmr(double coef, double **matrix, int n) {
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] *= coef;
-      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
-    }
-  }
-  return matrix;
-}
-
-
-double **symmetricMatrix(int n) {
-  double **symmetric = createMatrix(n);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (symmetric[i][j] == 1) symmetric[j][i] = 1;
-    }
-  }
-  return symmetric;
-}
-
-void freeMatrix(double **matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-void printMatrix(double** matrix, int n, int initialX, int initialY, HDC hdc)
-{
-  for (int i = 0, y = initialY + 30; i < n; i++, y += 15)
-  {
-    for (int j = 0, x = initialX; j < n; j++, x += 13)
-    {
-      wchar_t buffer[2];
-      swprintf(buffer, 2, L"%lf", matrix[i][j]);
-      TextOut(hdc, x, y, (LPCSTR) buffer, 1);
-    }
-    MoveToEx(hdc, initialX, y, NULL);
-  }
-}
