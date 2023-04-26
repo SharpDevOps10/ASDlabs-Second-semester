@@ -9,25 +9,22 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-char ProgName[] = "Lab 3";
+char ProgName[] = "j";
 
 struct coordinates {
-  double nx[vertices];
-  double ny[vertices];
-  double loopX[vertices];
-  double loopY[vertices];
+    double nx[vertices];
+    double ny[vertices];
+    double loopX[vertices];
+    double loopY[vertices];
 };
-double **createMatrix(int n) {
+
+
+double **randm(int n) {
+  srand(2220);
   double **matrix = (double **) malloc(sizeof(double *) * n);
   for (int i = 0; i < n; i++) {
     matrix[i] = (double *) malloc(sizeof(double) * n);
   }
-  return matrix;
-}
-
-double **randm(int n) {
-  srand(2220);
-  double **matrix = createMatrix(n);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
@@ -48,14 +45,25 @@ double **mulmr(double coef, double **matrix, int n) {
 }
 
 
-double **symmetricMatrix(int n) {
-  double **symmetric = createMatrix(n);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (symmetric[i][j] == 1) symmetric[j][i] = 1;
+double **symmetricMatrix(double **matrix, int n) {
+  double **symmetrical = (double **) malloc(n * sizeof(double *));
+  for (int i = 0; i < n; ++i) {
+    symmetrical[i] = (double*)malloc(n * sizeof(double));
+  }
+  for (int i = 0; i <n; i++) {
+    for (int j = 0; j <n; j++) {
+      symmetrical[i][j] = matrix[i][j];
     }
   }
-  return symmetric;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (symmetrical[i][j] != symmetrical[j][i]) {
+        symmetrical[i][j] = 1;
+        symmetrical[j][i] = 1;
+      }
+    }
+  }
+  return symmetrical;
 }
 
 void freeMatrix(double **matrix, int n) {
@@ -64,12 +72,10 @@ void freeMatrix(double **matrix, int n) {
   }
   free(matrix);
 }
-void printMatrix(double** matrix, int n, int initialX, int initialY, HDC hdc)
-{
-  for (int i = 0, y = initialY + 30; i < n; i++, y += 15)
-  {
-    for (int j = 0, x = initialX; j < n; j++, x += 13)
-    {
+
+void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
+  for (int i = 0, y = initialY + 30; i < n; i++, y += 15) {
+    for (int j = 0, x = initialX; j < n; j++, x += 13) {
       wchar_t buffer[2];
       swprintf(buffer, 2, L"%lf", matrix[i][j]);
       TextOut(hdc, x, y, (LPCSTR) buffer, 1);
@@ -202,20 +208,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       }
 
 
-
       double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
-      double** T = randm(vertices);
-      double** A = mulmr(coefficient, T, vertices);
+      double **T = randm(vertices);
+      double **A = mulmr(coefficient, T, vertices);
 
       int initialXOofRandMatrix = 750;
       int initialYofRandMatrix = 150;
       TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
-      printMatrix(A, vertices, initialXOofRandMatrix,initialYofRandMatrix, hdc);
+      printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
 
-
+      double **R = randm(vertices);
+      double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
+      int initialXOofSymmMatrix = initialXOofRandMatrix;
+      int initialYofSymmMatrix = initialYofRandMatrix + 210;
+      TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
+      printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      break;
+    default:
+      return (DefWindowProc(hWnd, messg, wParam, lParam));
+      break;
 
   }
+  return 0;
 }
+
 void arrow(double fi, double px, double py, HDC hdc) {
   double lx, ly, rx, ry;
   lx = px + 15 * cos(fi + 0.3);
