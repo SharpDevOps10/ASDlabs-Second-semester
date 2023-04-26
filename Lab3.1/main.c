@@ -48,10 +48,10 @@ double **mulmr(double coef, double **matrix, int n) {
 double **symmetricMatrix(double **matrix, int n) {
   double **symmetrical = (double **) malloc(n * sizeof(double *));
   for (int i = 0; i < n; ++i) {
-    symmetrical[i] = (double*)malloc(n * sizeof(double));
+    symmetrical[i] = (double *) malloc(n * sizeof(double));
   }
-  for (int i = 0; i <n; i++) {
-    for (int j = 0; j <n; j++) {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
       symmetrical[i][j] = matrix[i][j];
     }
   }
@@ -84,6 +84,70 @@ void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
   }
 }
 
+void arrow(double fi, double px, double py, HDC hdc) {
+  double lx, ly, rx, ry;
+  lx = px + 15 * cos(fi + 0.3);
+  rx = px + 15 * cos(fi - 0.3);
+  ly = py + 15 * sin(fi + 0.3);
+  ry = py + 15 * sin(fi - 0.3);
+  MoveToEx(hdc, lx, ly, NULL);
+  LineTo(hdc, px, py);
+  LineTo(hdc, rx, ry);
+}
+
+void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc) {
+  XFORM transformMatrix;
+  XFORM initialMatrix;
+  GetWorldTransform(hdc, &initialMatrix);
+
+  double angle = atan2(finalY - startY, finalX - startX) - M_PI / 2.0;
+  transformMatrix.eM11 = (FLOAT) cos(angle);
+  transformMatrix.eM12 = (FLOAT) sin(angle);
+  transformMatrix.eM21 = (FLOAT) (-sin(angle));
+  transformMatrix.eM22 = (FLOAT) cos(angle);
+  transformMatrix.eDx = (FLOAT) startX;
+  transformMatrix.eDy = (FLOAT) startY;
+  SetWorldTransform(hdc, &transformMatrix);
+
+  const double archWidthRatio = 0.55;
+  const double radiusOfVertex = 20.0;
+  double archLength = sqrt((finalX - startX) ^ 2 + (finalY - startY) ^ 2);
+  double semiMinorAxis = archWidthRatio * archLength;
+  double semiMajorAxis = archLength / 2;
+
+  double ellipseStartY = semiMajorAxis;
+
+  double vertexAreaSquared = semiMajorAxis * semiMajorAxis * radiusOfVertex * radiusOfVertex;
+  double semiAxesSquared = semiMinorAxis * semiMinorAxis * semiMajorAxis * semiMajorAxis;
+  double distanceFromCenter = semiMinorAxis * semiMinorAxis * ellipseStartY * ellipseStartY;
+  double distanceFromVertex = semiMinorAxis * semiMinorAxis * radiusOfVertex * radiusOfVertex;
+  double semiMinorAxisPow = pow(semiMinorAxis, 4);
+
+  double intersection = semiMajorAxis *
+                        sqrt(vertexAreaSquared - semiAxesSquared + distanceFromCenter - distanceFromVertex +
+                             semiMinorAxisPow);
+  double semiMinorAxisSquaredEllipseStartY = semiMinorAxis * semiMinorAxis * ellipseStartY;
+  double denominator = -semiMajorAxis * semiMajorAxis + semiMinorAxis * semiMinorAxis;
+
+
+  double contactYRightTop = (semiMinorAxisSquaredEllipseStartY - intersection) / denominator;
+  double contactXRightTop = sqrt(radiusOfVertex * radiusOfVertex - contactYRightTop * contactYRightTop);
+  double contactYBottom = archLength - contactYRightTop;
+  double contactXLeftBottom = -contactXRightTop;
+
+  if (archInterval <= vertices / 2) {
+    Arc(hdc, -archWidthRatio * archLength, archLength, archWidthRatio * archLength, 0, 0, 0, 0, archLength);
+    double angleOfArrow = -atan2(archLength - contactYBottom, contactXLeftBottom) + 0.3 / 3;
+    arrow(angleOfArrow, contactXLeftBottom, contactYBottom, hdc);
+  } else {
+    Arc(hdc, -archWidthRatio * archLength, archLength, archWidthRatio * archLength, 0, 0, archLength, 0, 0);
+    double angleOfArrow = -atan2(archLength - contactYBottom, -contactXLeftBottom) - 0.3 / 3;
+    arrow(angleOfArrow, -contactXLeftBottom, contactYBottom, hdc);
+  }
+
+  SetWorldTransform(hdc, &initialMatrix);
+
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
@@ -223,26 +287,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       int initialYofSymmMatrix = initialYofRandMatrix + 210;
       TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
       printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+      EndPaint(hWnd, &ps);
+
+      freeMatrix(A, vertices);
+      freeMatrix(C, vertices);
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
     default:
       return (DefWindowProc(hWnd, messg, wParam, lParam));
-      break;
-
   }
   return 0;
 }
 
-void arrow(double fi, double px, double py, HDC hdc) {
-  double lx, ly, rx, ry;
-  lx = px + 15 * cos(fi + 0.3);
-  rx = px + 15 * cos(fi - 0.3);
-  ly = py + 15 * sin(fi + 0.3);
-  ry = py + 15 * sin(fi - 0.3);
-  MoveToEx(hdc, lx, ly, NULL);
-  LineTo(hdc, px, py);
-  LineTo(hdc, rx, ry);
-}
+
+
 
 
