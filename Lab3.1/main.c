@@ -4,8 +4,8 @@
 #include <math.h>
 
 #define vertices 12
-#define IDC_BUTTON 3456
-#define IDC_BUTTON2 3457
+#define IDC_BUTTON 1
+#define IDC_BUTTON2 2
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -95,19 +95,18 @@ void arrow(double fi, double px, double py, HDC hdc) {
   LineTo(hdc, rx, ry);
 }
 
-void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc)
-{
+void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc) {
   XFORM transformMatrix;
   XFORM initialMatrix;
   GetWorldTransform(hdc, &initialMatrix);
 
   double angle = atan2(finalY - startY, finalX - startX) - M_PI / 2.0;
-  transformMatrix.eM11 = (FLOAT)cos(angle);
-  transformMatrix.eM12 = (FLOAT)sin(angle);
-  transformMatrix.eM21 = (FLOAT)(-sin(angle));
-  transformMatrix.eM22 = (FLOAT)cos(angle);
-  transformMatrix.eDx = (FLOAT)startX;
-  transformMatrix.eDy = (FLOAT)startY;
+  transformMatrix.eM11 = (FLOAT) cos(angle);
+  transformMatrix.eM12 = (FLOAT) sin(angle);
+  transformMatrix.eM21 = (FLOAT) (-sin(angle));
+  transformMatrix.eM22 = (FLOAT) cos(angle);
+  transformMatrix.eDx = (FLOAT) startX;
+  transformMatrix.eDy = (FLOAT) startY;
   SetWorldTransform(hdc, &transformMatrix);
 
   const double archWidthRatio = 0.75;
@@ -150,21 +149,18 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
 
 }
 
-void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle, struct coordinates coordinates, double** matrix,
-                         HPEN KPen, HPEN GPen, HDC hdc)
-{
-  for (int i = 0; i < vertices; i++)
-  {
-    for (int j = 0; j < vertices; j++)
-    {
+void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
+                    struct coordinates coordinates, double **matrix,
+                    HPEN KPen, HPEN GPen, HDC hdc) {
+  for (int i = 0; i < vertices; i++) {
+    for (int j = 0; j < vertices; j++) {
       MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
-      if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[j][i] == 0))
-      {
-        if (i == j)
-        {
+      if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[j][i] == 0)) {
+        if (i == j) {
           SelectObject(hdc, GPen);
 
-          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop, coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
+          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop,
+                  coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
 
 
           double radiusOfContact = radiusOfGraph + radiusOfLoop / 2.;
@@ -172,28 +168,50 @@ void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radius
           double loopAngle = atan2(triangleHeight, radiusOfContact);
           double contactDistance = sqrt(radiusOfContact * radiusOfContact + triangleHeight * triangleHeight);
           double angleToContactVertex = atan2(coordinates.ny[i] - centerY, coordinates.nx[i] - centerX);
-          
+
           double contactPointX = centerX + contactDistance * cos(angleToContactVertex + loopAngle);
           double contactPointY = centerY + contactDistance * sin(angleToContactVertex + loopAngle);
-          
+
           double curvatureAngle = angleToContactVertex + 0.3 / 2.;
           arrow(curvatureAngle, contactPointX, contactPointY, hdc);
           SelectObject(hdc, KPen);
-        }
-        else
-        {
+        } else {
           LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
           double line_angle = atan2(coordinates.ny[i] - coordinates.ny[j], coordinates.nx[i] - coordinates.nx[j]);
-          arrow(line_angle, coordinates.nx[j] + radiusOfVertex * cos(line_angle), coordinates.ny[j] + radiusOfVertex * sin(line_angle), hdc);
+          arrow(line_angle, coordinates.nx[j] + radiusOfVertex * cos(line_angle),
+                coordinates.ny[j] + radiusOfVertex * sin(line_angle), hdc);
         }
-      }
-      else if (j < i && matrix[i][j] == 1 && matrix[j][i] == 1)
-      {
+      } else if (j < i && matrix[i][j] == 1 && matrix[j][i] == 1) {
         depictArch(coordinates.nx[i], coordinates.ny[i], coordinates.nx[j], coordinates.ny[j], fabs(i - j), hdc);
       }
 
     }
   }
+}
+
+void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
+                      struct coordinates coordinates, double **matrix,
+                      HPEN KPen, HPEN GPen, HDC hdc) {
+  for (int i = 0; i < vertices; ++i) {
+
+    for (int j = 0; j < vertices; ++j) {
+      MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
+
+      if (matrix[i][j] == 1) {
+
+        if (i == j) {
+          SelectObject(hdc, GPen);
+          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop,
+                  coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
+          SelectObject(hdc, KPen);
+        } else {
+          LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
+        }
+
+      }
+    }
+  }
+
 }
 
 
@@ -215,7 +233,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) L"Lab 3. Made by Daniil Timofeev",
+                      (LPCSTR) "Lab 3.  by Daniil Timofeev",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
@@ -236,29 +254,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   HDC hdc;
   PAINTSTRUCT ps;
-  HWND hwndButton_direct;
-  HWND hwndButton_undirect;
+  HWND Button_directed;
+  HWND Button_undirected;
   int state = 0;
   switch (messg) {
     case WM_CREATE: {
-      hwndButton_direct = CreateWindow(
-              (LPCSTR) L"BUTTON",
-              (LPCSTR) L"Directed graph",
+      Button_directed = CreateWindow(
+              (LPCSTR) "BUTTON",
+              (LPCSTR) "Switch Directed graph",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
-              50,
+              30,
               160,
               50,
               hWnd,
               (HMENU) IDC_BUTTON,
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
-      hwndButton_undirect = CreateWindow(
-              (LPCSTR) L"BUTTON",
-              (LPCSTR) L"Undirected graph",
+      Button_undirected = CreateWindow(
+              (LPCSTR) "BUTTON",
+              (LPCSTR) "Switch Undirected graph",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
-              125,
+              600,
               160,
               50,
               hWnd,
@@ -292,7 +310,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       Rectangle(hdc, 0, 0, 670, 700);
 
 
-      char* nn[vertices] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0" };
+      char *nn[vertices] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0"};
 
       struct coordinates coordinates;
 
@@ -304,7 +322,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       double circleCenterX = 370;
       double circleCenterY = 360;
-
 
 
       double angleAlpha = 2.0 * M_PI / (double) vertices;
@@ -341,6 +358,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       if (state == 0) {
         depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                             coordinates, A, KPen, GPen, hdc);
+      } else {
+        depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                              coordinates, C, KPen, GPen, hdc);
       }
 
       SelectObject(hdc, BPen);
