@@ -149,6 +149,53 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
 
 }
 
+void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
+                    struct coordinates coordinates, double **matrix, HPEN KPen, HPEN GPen, HDC hdc) {
+  for (int i = 0; i < vertices; ++i) {
+
+    for (int j = 0; j < vertices; ++j) {
+      MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
+      if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[i][j] == 0)) {
+
+        if (i == j) {
+          SelectObject(hdc, GPen);
+
+          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop,
+                  coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
+
+          double radiusOfContact = radiusOfGraph + radiusOfLoop / 2;
+          double triangleHeight = sqrt(3) * radiusOfVertex / 2;
+          double loopAngle = atan2(triangleHeight, radiusOfContact);
+          double contactDistance = sqrt(radiusOfContact * radiusOfContact + triangleHeight * triangleHeight);
+          double angleToContactVertex = atan2(coordinates.ny[i] - centerY, coordinates.nx[i] - centerX);
+
+          double contactPointX = centerX + contactDistance * cos(angleToContactVertex + loopAngle);
+          double contactPointY = centerY + contactDistance * sin(angleToContactVertex + loopAngle);
+
+          double curvatureAngle = angleToContactVertex + 0.3 / 2;
+          arrow(curvatureAngle, contactPointX, contactPointY, hdc);
+          SelectObject(hdc, KPen);
+
+        } else {
+          LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
+          double edgeAngle = atan2(coordinates.ny[i] - coordinates.ny[j], coordinates.nx[i] - coordinates.nx[j]);
+          arrow(edgeAngle, coordinates.nx[j] + radiusOfVertex * cos(edgeAngle),
+                coordinates.ny[j] + radiusOfVertex * sin(edgeAngle), hdc);
+
+        }
+
+      } else if (j < i && matrix[i][j] == 1 && matrix[j][i] == 1) {
+        depictArch(coordinates.nx[i], coordinates.ny[i], coordinates.nx[j], coordinates.ny[j], fabs(i - j), hdc);
+      }
+
+
+    }
+
+  }
+
+}
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
   w.lpszClassName = ProgName;
@@ -244,10 +291,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       Rectangle(hdc, 0, 0, 670, 700);
 
 
-      wchar_t *nn[vertices] = {
-              L"1", L"2", L"3", L"4", L"5", L"6",
-              L"7", L"8", L"9", L"10", L"11", L"12"
-      };
+      char *nn[vertices] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0"};
 
       struct coordinates coordinates;
 
