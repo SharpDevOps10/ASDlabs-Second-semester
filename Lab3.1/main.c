@@ -9,7 +9,7 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-char ProgName[] = "j";
+char ProgName[] = "Lab 3";
 
 struct coordinates {
     double nx[vertices];
@@ -95,23 +95,24 @@ void arrow(double fi, double px, double py, HDC hdc) {
   LineTo(hdc, rx, ry);
 }
 
-void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc) {
+void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc)
+{
   XFORM transformMatrix;
   XFORM initialMatrix;
   GetWorldTransform(hdc, &initialMatrix);
 
   double angle = atan2(finalY - startY, finalX - startX) - M_PI / 2.0;
-  transformMatrix.eM11 = (FLOAT) cos(angle);
-  transformMatrix.eM12 = (FLOAT) sin(angle);
-  transformMatrix.eM21 = (FLOAT) (-sin(angle));
-  transformMatrix.eM22 = (FLOAT) cos(angle);
-  transformMatrix.eDx = (FLOAT) startX;
-  transformMatrix.eDy = (FLOAT) startY;
+  transformMatrix.eM11 = (FLOAT)cos(angle);
+  transformMatrix.eM12 = (FLOAT)sin(angle);
+  transformMatrix.eM21 = (FLOAT)(-sin(angle));
+  transformMatrix.eM22 = (FLOAT)cos(angle);
+  transformMatrix.eDx = (FLOAT)startX;
+  transformMatrix.eDy = (FLOAT)startY;
   SetWorldTransform(hdc, &transformMatrix);
 
-  const double archWidthRatio = 0.55;
-  const double radiusOfVertex = 20.0;
-  double archLength = sqrt((finalX - startX) ^ 2 + (finalY - startY) ^ 2);
+  const double archWidthRatio = 0.75;
+  double archLength = sqrt((finalX - startX) * (finalX - startX) + (finalY - startY) * (finalY - startY));
+  double radiusOfVertex = 15.0;
   double semiMinorAxis = archWidthRatio * archLength;
   double semiMajorAxis = archLength / 2;
 
@@ -149,50 +150,50 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
 
 }
 
-void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
-                    struct coordinates coordinates, double **matrix, HPEN KPen, HPEN GPen, HDC hdc) {
-  for (int i = 0; i < vertices; ++i) {
-
-    for (int j = 0; j < vertices; ++j) {
+void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle, struct coordinates coordinates, double** matrix,
+                         HPEN KPen, HPEN GPen, HDC hdc)
+{
+  for (int i = 0; i < vertices; i++)
+  {
+    for (int j = 0; j < vertices; j++)
+    {
       MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
-      if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[i][j] == 0)) {
-
-        if (i == j) {
+      if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[j][i] == 0))
+      {
+        if (i == j)
+        {
           SelectObject(hdc, GPen);
 
-          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop,
-                  coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
+          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop, coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
 
-          double radiusOfContact = radiusOfGraph + radiusOfLoop / 2;
-          double triangleHeight = sqrt(3) * radiusOfVertex / 2;
+
+          double radiusOfContact = radiusOfGraph + radiusOfLoop / 2.;
+          double triangleHeight = sqrt(3) * radiusOfVertex / 2.;
           double loopAngle = atan2(triangleHeight, radiusOfContact);
           double contactDistance = sqrt(radiusOfContact * radiusOfContact + triangleHeight * triangleHeight);
           double angleToContactVertex = atan2(coordinates.ny[i] - centerY, coordinates.nx[i] - centerX);
-
+          
           double contactPointX = centerX + contactDistance * cos(angleToContactVertex + loopAngle);
           double contactPointY = centerY + contactDistance * sin(angleToContactVertex + loopAngle);
-
-          double curvatureAngle = angleToContactVertex + 0.3 / 2;
+          
+          double curvatureAngle = angleToContactVertex + 0.3 / 2.;
           arrow(curvatureAngle, contactPointX, contactPointY, hdc);
           SelectObject(hdc, KPen);
-
-        } else {
-          LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
-          double edgeAngle = atan2(coordinates.ny[i] - coordinates.ny[j], coordinates.nx[i] - coordinates.nx[j]);
-          arrow(edgeAngle, coordinates.nx[j] + radiusOfVertex * cos(edgeAngle),
-                coordinates.ny[j] + radiusOfVertex * sin(edgeAngle), hdc);
-
         }
-
-      } else if (j < i && matrix[i][j] == 1 && matrix[j][i] == 1) {
+        else
+        {
+          LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
+          double line_angle = atan2(coordinates.ny[i] - coordinates.ny[j], coordinates.nx[i] - coordinates.nx[j]);
+          arrow(line_angle, coordinates.nx[j] + radiusOfVertex * cos(line_angle), coordinates.ny[j] + radiusOfVertex * sin(line_angle), hdc);
+        }
+      }
+      else if (j < i && matrix[i][j] == 1 && matrix[j][i] == 1)
+      {
         depictArch(coordinates.nx[i], coordinates.ny[i], coordinates.nx[j], coordinates.ny[j], fabs(i - j), hdc);
       }
 
-
     }
-
   }
-
 }
 
 
@@ -237,7 +238,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   PAINTSTRUCT ps;
   HWND hwndButton_direct;
   HWND hwndButton_undirect;
-  int flag = 1;
+  int state = 0;
   switch (messg) {
     case WM_CREATE: {
       hwndButton_direct = CreateWindow(
@@ -270,12 +271,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       switch (LOWORD(wParam)) {
 
         case IDC_BUTTON:
-          flag = 0;
+          state = 0;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
 
         case IDC_BUTTON2:
-          flag = 1;
+          state = 1;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
       }
@@ -285,25 +286,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       SetGraphicsMode(hdc, GM_ADVANCED);
       HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
       HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
-      HPEN GPen = CreatePen(PS_SOLID, 2, RGB(128, 0, 128));
+      HPEN GPen = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
       HPEN NoPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
       SelectObject(hdc, NoPen);
       Rectangle(hdc, 0, 0, 670, 700);
 
 
-      char *nn[vertices] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0"};
+      char* nn[vertices] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0" };
 
       struct coordinates coordinates;
 
-      double circleRadius = 300;
-      double vertexRadius = circleRadius / 10;
+      double circleRadius = 200;
+      double vertexRadius = circleRadius / 12;
 
       double loopRadius = vertexRadius;
-
-      double circleCenterX = 450;
-      double circleCenterY = 450;
-
       double dtx = vertexRadius / 2.5;
+
+      double circleCenterX = 370;
+      double circleCenterY = 360;
+
+
 
       double angleAlpha = 2.0 * M_PI / (double) vertices;
       for (int i = 0; i < vertices; i++) {
@@ -316,8 +318,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       }
 
 
-      double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
       double **T = randm(vertices);
+      double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
       double **A = mulmr(coefficient, T, vertices);
 
       int initialXOofRandMatrix = 750;
@@ -331,6 +333,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       int initialYofSymmMatrix = initialYofRandMatrix + 210;
       TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
       printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+
+
+      SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
+      SelectObject(hdc, KPen);
+
+      if (state == 0) {
+        depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                            coordinates, A, KPen, GPen, hdc);
+      }
+
+      SelectObject(hdc, BPen);
+      SelectObject(hdc, GetStockObject(DC_BRUSH));
+      SetDCBrushColor(hdc, RGB(204, 204, 255));
+      SetBkMode(hdc, TRANSPARENT);
+
+      for (int i = 0; i < vertices; ++i) {
+        Ellipse(hdc, coordinates.nx[i] - vertexRadius, coordinates.ny[i] - vertexRadius,
+                coordinates.nx[i] + vertexRadius, coordinates.ny[i] + vertexRadius);
+        TextOut(hdc, coordinates.nx[i] - dtx, coordinates.ny[i] - vertexRadius / 2, nn[i], 2);
+      }
+
+
       EndPaint(hWnd, &ps);
 
       freeMatrix(A, vertices);
