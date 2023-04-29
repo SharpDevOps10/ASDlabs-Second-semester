@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
-
 #define vertices 12
 #define IDC_BUTTON 1
 #define IDC_BUTTON2 2
