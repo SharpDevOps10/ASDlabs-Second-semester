@@ -233,7 +233,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) "Lab 3.  by Daniil Timofeev",
+                      (LPCSTR) "Lab 3.  by Daniil Timofeev IM-22",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
@@ -261,7 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
     case WM_CREATE: {
       Button_directed = CreateWindow(
               (LPCSTR) "BUTTON",
-              (LPCSTR) "Switch Directed graph",
+              (LPCSTR) "Switch to Directed",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               30,
@@ -273,7 +273,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               NULL);
       Button_undirected = CreateWindow(
               (LPCSTR) "BUTTON",
-              (LPCSTR) "Switch Undirected graph",
+              (LPCSTR) "Switch to Undirected",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               600,
@@ -326,12 +326,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       double angleAlpha = 2.0 * M_PI / (double) vertices;
       for (int i = 0; i < vertices; i++) {
+
         double sinAlpha = sin(angleAlpha * (double) i);
         double cosAlpha = cos(angleAlpha * (double) i);
         coordinates.nx[i] = circleCenterX + circleRadius * sinAlpha;
         coordinates.ny[i] = circleCenterY - circleRadius * cosAlpha;
         coordinates.loopX[i] = circleCenterX + (circleRadius + loopRadius) * sinAlpha;
         coordinates.loopY[i] = circleCenterY - (circleRadius + loopRadius) * cosAlpha;
+
       }
 
 
@@ -387,8 +389,3 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   }
   return 0;
 }
-
-
-
-
-
