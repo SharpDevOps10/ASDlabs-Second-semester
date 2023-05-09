@@ -337,7 +337,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
       double **T = randm(vertices);
-      double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
+      double coefficient = 1.0 - 0.01 - 0.01 - 0.3;
       double **A = mulmr(coefficient, T, vertices);
 
       int initialXOofRandMatrix = 750;
