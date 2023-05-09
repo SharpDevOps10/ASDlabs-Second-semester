@@ -8,7 +8,7 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-char ProgName[] = "Lab 3";
+char ProgName[] = "Lab 4";
 
 struct coordinates {
     double nx[vertices];
@@ -232,7 +232,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) "Lab 3.  by Daniil Timofeev IM-22",
+                      (LPCSTR) "Lab 4.  by Daniil Timofeev IM-22",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
