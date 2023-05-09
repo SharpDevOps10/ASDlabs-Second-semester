@@ -5,6 +5,8 @@
 #define vertices 12
 #define IDC_BUTTON 1
 #define IDC_BUTTON2 2
+#define IDC_BUTTON3 3
+#define IDC_BUTTON4 4
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -255,6 +257,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   PAINTSTRUCT ps;
   HWND Button_directed;
   HWND Button_undirected;
+  HWND Button_modified;
   int state = 0;
   switch (messg) {
     case WM_CREATE: {
@@ -280,6 +283,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               50,
               hWnd,
               (HMENU) IDC_BUTTON2,
+              (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+              NULL);
+      Button_modified = CreateWindow(
+              (LPCSTR) "BUTTON",
+              (LPCSTR) "Switch to Modified",
+              WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+              700,
+              30,
+              160,
+              50,
+              hWnd,
+              (HMENU) IDC_BUTTON3,
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
       return 0;
@@ -364,7 +379,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
       SelectObject(hdc, KPen);
-
       if (state == 0) {
         depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                             coordinates, A, KPen, GPen, hdc);
