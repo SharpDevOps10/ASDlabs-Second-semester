@@ -353,6 +353,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
 
 
+      double** K = randm(vertices);
+      double modifiedCoefficient = 1.0 - 0.005 - 0.005 - 0.27;
+      double** D = mulmr(modifiedCoefficient, K, vertices);
+      int initialXOofModMatrix = initialXOofRandMatrix + 210;
+      int initialYofModMatrix = initialYofRandMatrix;
+      TextOutA(hdc, initialXOofModMatrix, initialYofModMatrix, (LPCSTR) L"Modified Matrix", 31);
+      printMatrix(D, vertices, initialXOofModMatrix, initialYofModMatrix, hdc);
+
+
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
       SelectObject(hdc, KPen);
 
