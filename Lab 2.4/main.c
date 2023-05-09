@@ -238,7 +238,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
-                      1000,
+                      1450,
                       700,
                       (HWND) NULL,
                       (HMENU) NULL,
@@ -289,7 +289,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               (LPCSTR) "BUTTON",
               (LPCSTR) "Switch to Modified",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-              700,
+              1000,
               30,
               160,
               50,
@@ -309,6 +309,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
         case IDC_BUTTON2:
           state = 1;
+          InvalidateRect(hWnd, NULL, FALSE);
+          break;
+
+        case IDC_BUTTON3:
+          state = 2;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
       }
@@ -379,13 +384,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
       SelectObject(hdc, KPen);
-      if (state == 0) {
-        depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                            coordinates, A, KPen, GPen, hdc);
-      } else {
-        depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                              coordinates, C, KPen, GPen, hdc);
+     if (state == 0) {
+          depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                              coordinates, A, KPen, GPen, hdc);
+        } else {
+          depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                                coordinates, C, KPen, GPen, hdc);
       }
+     if (state == 2) {
+       depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                           coordinates, D, KPen, GPen, hdc);
+     }
 
       SelectObject(hdc, BPen);
       SelectObject(hdc, GetStockObject(DC_BRUSH));
