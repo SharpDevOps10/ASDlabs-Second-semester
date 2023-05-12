@@ -17,3 +17,18 @@ int* graphDegrees(double** matrix) {
   }
   return vertexDegree;
 }
+
+int* halfDegreeEntry(double** matrix) {
+  int number = vertices;
+  int* vertexDegree;
+  vertexDegree = malloc(number * sizeof(int));
+  int vertexDegreeCounter;
+  for (int j = 0; j < number; ++j) {
+    vertexDegreeCounter = 0;
+    for (int i = 0; i < number; ++i) {
+      if(matrix[i][j] ) vertexDegreeCounter++;
+    }
+    vertexDegree[j] = vertexDegreeCounter;
+  }
+  return vertexDegree;
+}
