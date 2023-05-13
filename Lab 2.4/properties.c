@@ -65,7 +65,20 @@ int* findTerminalVertices(int* deegresArray) {
   int position = 0;
   terminalVertices[position++] = 0;
   for (int i = 0; i < number; ++i) {
-    if(deegresArray[i] == 1)  terminalVertices[position++] = i+1;
+    if(deegresArray[i] == 1)  terminalVertices[position++] = i + 1;
   }
   return terminalVertices;
+}
+
+int* findIsolatedVertices(const int* degreesArray) {
+  const int number = vertices;
+  int* isolatedVertices = calloc(number, sizeof(int));
+  int position = 0;
+  isolatedVertices[position++] = 0;
+
+  for (int i = 0; i < number; ++i) {
+    if(degreesArray[i] == 0) isolatedVertices[position++] = i + 1;
+  }
+
+  return isolatedVertices;
 }
