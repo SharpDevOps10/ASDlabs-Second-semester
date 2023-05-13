@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int* graphDegrees(double** matrix) {
-  int number = vertices;
+  const int number = vertices;
   int* vertexDegree;
   vertexDegree = malloc(number * sizeof(int));
   int vertexDegreeCounter;
@@ -19,7 +19,7 @@ int* graphDegrees(double** matrix) {
 }
 
 int* halfDegreeEntry(double** matrix) {
-  int number = vertices;
+  const int number = vertices;
   int* vertexDegree;
   vertexDegree = malloc(number * sizeof(int));
   int vertexDegreeCounter;
@@ -34,7 +34,7 @@ int* halfDegreeEntry(double** matrix) {
 }
 
 int* halfDegreeExit(double** matrix) {
-  int number = vertices;
+  const int number = vertices;
   int* vertexDegree;
   vertexDegree = malloc(number * sizeof(int));
   int vertexDegreeCounter;
@@ -48,8 +48,8 @@ int* halfDegreeExit(double** matrix) {
   return vertexDegree;
 }
 
-int* calculateTotalDegrees(int* exit, int* entry) {
-  int number = vertices;
+int* calculateTotalDegrees(const int* exit, const int* entry) {
+  const int number = vertices;
   int* vertexDegree;
   vertexDegree = malloc(number * sizeof(int));
   for (int i = 0; i < number; ++i) {
@@ -59,13 +59,13 @@ int* calculateTotalDegrees(int* exit, int* entry) {
   return vertexDegree;
 }
 
-int* findTerminalVertices(int* deegresArray) {
+int* findTerminalVertices(const int* degreesArray) {
   const int number = vertices;
   int* terminalVertices = calloc(number, sizeof(int));
   int position = 0;
   terminalVertices[position++] = 0;
   for (int i = 0; i < number; ++i) {
-    if(deegresArray[i] == 1)  terminalVertices[position++] = i + 1;
+    if(degreesArray[i] == 1) terminalVertices[position++] = i + 1;
   }
   return terminalVertices;
 }
