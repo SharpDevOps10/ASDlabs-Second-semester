@@ -119,3 +119,18 @@ double** multiplyMatrices(double** AMatrix, double** BMatrix) {
   }
   return multipliedMatrix;
 }
+
+double** copyMatrix(double** matrix) {
+  const int number = vertices;
+  double **copiedMatrix = (double **) malloc(sizeof(double *) * number);
+  for (int i = 0; i < number; ++i) {
+    copiedMatrix[i] = (double *) malloc(sizeof(double) * number);
+    for (int j = 0; j < number; ++j) {
+      copiedMatrix[i][j] = matrix[i][j];
+    }
+  }
+  return copiedMatrix;
+}
+
+
+
