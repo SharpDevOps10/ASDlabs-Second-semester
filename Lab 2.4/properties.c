@@ -104,3 +104,18 @@ double** summarizeMatrices(double** AMatrix, double** BMatrix) {
   }
   return summedMatrix;
 }
+
+double** multiplyMatrices(double** AMatrix, double** BMatrix) {
+  const int number = vertices;
+  double **multipliedMatrix = (double **) malloc(sizeof(double *) * number);
+  for (int i = 0; i < number; ++i) {
+    multipliedMatrix[i] = (double *) malloc(sizeof(double) * number);
+    for (int j = 0; j < number; ++j) {
+      multipliedMatrix[i][j] = 0;
+      for (int e = 0; e < number; ++e) {
+        multipliedMatrix[i][j] += AMatrix[i][e] * BMatrix[e][j];
+      }
+    }
+  }
+  return multipliedMatrix;
+}
