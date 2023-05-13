@@ -92,3 +92,15 @@ int checkHomogeneity(const int* degreesArray) {
   }
   return 1;
 }
+
+double** summarizeMatrices(double** AMatrix, double** BMatrix) {
+  const int number = vertices;
+  double **summedMatrix = (double **) malloc(sizeof(double *) * number);
+  for (int i = 0; i < number; i++) {
+    summedMatrix[i] = (double *) malloc(sizeof(double) * number);
+    for (int j = 0; j < number; ++j) {
+      summedMatrix[i][j] = AMatrix[i][j] + BMatrix[i][j];
+    }
+  }
+  return summedMatrix;
+}
