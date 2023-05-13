@@ -41,9 +41,20 @@ int* halfDegreeExit(double** matrix) {
   for (int i = 0; i < number; ++i) {
     vertexDegreeCounter = 0;
     for (int j = 0; j < number; ++j) {
-      if(matrix[i][j] ) vertexDegreeCounter++;
+      if(matrix[i][j]) vertexDegreeCounter++;
     }
     vertexDegree[i] = vertexDegreeCounter;
   }
+  return vertexDegree;
+}
+
+int* calculateTotalDegrees(int* exit, int* entry) {
+  int number = vertices;
+  int* vertexDegree;
+  vertexDegree = malloc(number * sizeof(int));
+  for (int i = 0; i < number; ++i) {
+    vertexDegree[i] = exit[i] + entry[i];
+  }
+
   return vertexDegree;
 }
