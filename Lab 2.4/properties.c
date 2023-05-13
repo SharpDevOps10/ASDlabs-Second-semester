@@ -82,3 +82,13 @@ int* findIsolatedVertices(const int* degreesArray) {
 
   return isolatedVertices;
 }
+
+int checkHomogeneity(const int* degreesArray) {
+  const int number = vertices;
+  int firstDegree = degreesArray[0];
+  for (int i = 1; i < number; ++i) {
+    if(degreesArray[i] != firstDegree) return 0;
+    firstDegree = degreesArray[i];
+  }
+  return 1;
+}
