@@ -133,4 +133,11 @@ double** copyMatrix(double** matrix) {
 }
 
 
-
+void booleanConversion(double** matrix) {
+  const int number = vertices;
+  for (int i = 0; i < number; ++i) {
+    for (int j = 0; j < number; ++j) {
+      if (matrix[i][j]) matrix[i][j] = 1;
+    }
+  }
+}
