@@ -58,3 +58,14 @@ int* calculateTotalDegrees(int* exit, int* entry) {
 
   return vertexDegree;
 }
+
+int* findTerminalVertices(int* deegresArray) {
+  const int number = vertices;
+  int* terminalVertices = calloc(number, sizeof(int));
+  int position = 0;
+  terminalVertices[position++] = 0;
+  for (int i = 0; i < number; ++i) {
+    if(deegresArray[i] == 1)  terminalVertices[position++] = i+1;
+  }
+  return terminalVertices;
+}
