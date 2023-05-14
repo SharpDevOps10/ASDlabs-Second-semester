@@ -149,4 +149,25 @@ void booleanConversion(double** matrix) {
   }
 }
 
+double** calculateReachabilityMatrix(double** matrix) {
+  const int number = vertices;
+  double** copiedMatrix = copyMatrix(matrix);
+  double** reachabilityMatrix = copiedMatrix;
+  double** tempMatrix = copiedMatrix;
+
+  for (int i = 1; i < number - 1; ++i) {
+    double** resultedMatrix = multiplyMatrices(tempMatrix, matrix);
+    double** updatedMatrix = summarizeMatrices(reachabilityMatrix, resultedMatrix);
+    freeMatrix(reachabilityMatrix, number);
+    freeMatrix(tempMatrix, number);
+    tempMatrix = resultedMatrix;
+    reachabilityMatrix = updatedMatrix;
+  }
+  for (int i = 0; i < number; ++i) {
+    reachabilityMatrix[i][i] += 1;
+  }
+  freeMatrix(tempMatrix, number);
+  booleanConversion(reachabilityMatrix);
+  return reachabilityMatrix;
+}
 
