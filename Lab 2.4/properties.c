@@ -171,3 +171,25 @@ double** calculateReachabilityMatrix(double** matrix) {
   return reachabilityMatrix;
 }
 
+
+void dfs(double** graph, int startVertex, int* component, int* visited) {
+  const int number = vertices;
+  int stack[number];
+  int top = -1;
+
+  stack[++top] = startVertex;
+  visited[startVertex] = 1;
+  component[startVertex] = 1;
+
+  while (top >= 0) {
+    int currentVertex = stack[top--];
+
+    for (int i = 0; i < number; i++) {
+      if (!visited[i] && graph[currentVertex][i]) {
+        stack[++top] = i;
+        visited[i] = 1;
+        component[i] = 1;
+      }
+    }
+  }
+}
