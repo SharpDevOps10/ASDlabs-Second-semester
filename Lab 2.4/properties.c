@@ -172,7 +172,7 @@ double** calculateReachabilityMatrix(double** matrix) {
 }
 
 
-void dfs(double** graph, int startVertex, int* component, int* visited) {
+void dfs(double** graph, int startVertex, double* component, int* visited) {
   const int number = vertices;
   int stack[number];
   int top = -1;
@@ -192,4 +192,24 @@ void dfs(double** graph, int startVertex, int* component, int* visited) {
       }
     }
   }
+}
+
+
+double** findStrongComponents(double** strongMatrix) {
+  const int number = vertices;
+  int* visitedVertex = calloc(number, sizeof(int));
+  double** connectedComponents = calloc(number, sizeof(double *));
+  for (int i = 0; i < number; i++) {
+    connectedComponents[i] = calloc(number, sizeof(double));
+  }
+
+  for (int i = 0; i < number; ++i) {
+    if(!visitedVertex[i]) {
+      dfs(strongMatrix, i, connectedComponents[i], visitedVertex);
+    }
+  }
+
+  free(visitedVertex);
+  return connectedComponents;
+
 }
