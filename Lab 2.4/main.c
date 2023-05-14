@@ -300,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
       return 0;
-    }
+  }
     case WM_COMMAND: {
       switch (LOWORD(wParam)) {
 

@@ -1,7 +1,7 @@
 #define vertices 12
 #include <stdlib.h>
 #include <stdio.h>
-
+void freeMatrix(double **matrix, int n);
 int* graphDegrees(double** matrix) {
   const int number = vertices;
   int* vertexDegree;
@@ -18,12 +18,7 @@ int* graphDegrees(double** matrix) {
   return vertexDegree;
 }
 
-void freeMatrix(double **matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
+
 
 int* halfDegreeEntry(double** matrix) {
   const int number = vertices;
