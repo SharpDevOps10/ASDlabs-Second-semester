@@ -18,6 +18,13 @@ int* graphDegrees(double** matrix) {
   return vertexDegree;
 }
 
+void freeMatrix(double **matrix, int n) {
+  for (int i = 0; i < n; ++i) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+
 int* halfDegreeEntry(double** matrix) {
   const int number = vertices;
   int* vertexDegree;
@@ -141,3 +148,5 @@ void booleanConversion(double** matrix) {
     }
   }
 }
+
+
