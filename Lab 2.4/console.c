@@ -43,6 +43,29 @@ void printPathways(double** matrix) {
   }
 }
 
+void printComponents(double **matrix, int number) {
+  number = vertices;
+  int numComponents = 1;
+  for (int i = 0; i < number; i++) {
+    int isNewGroup = 1;
+    printf("Component %d: { ", numComponents);
+    for (int j = 0; j < number; j++) {
+      if (matrix[i][j]) {
+        if (!isNewGroup) {
+          printf(", ");
+        }
+        printf("%d", j + 1);
+        isNewGroup = 0;
+      }
+    }
+    if (!isNewGroup) {
+      printf(" }\n");
+      numComponents++;
+    }
+  }
+}
+
+
 void aboutDirectedGraph() {
 
   double **T = randm(vertices);
