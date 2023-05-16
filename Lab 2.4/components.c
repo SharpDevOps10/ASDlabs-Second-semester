@@ -223,3 +223,18 @@ double** findStrongComponents(double** strongMatrix) {
   return connectedComponents;
 
 }
+
+double** strongConnectivityMatrix(double **reachabilityMatrix) {
+  const int number = vertices;
+  double** transposedMatrix = transposeMatrix(reachabilityMatrix, number);
+  double **strongConnectivityMatrix = calloc(number, sizeof(double*));
+  for (int i = 0; i < number; i++) {
+    strongConnectivityMatrix[i] = calloc(number, sizeof(double));
+    for (int j = 0; j < number; j++) {
+      strongConnectivityMatrix[i][j] = reachabilityMatrix[i][j] * transposedMatrix[i][j];
+    }
+  }
+  freeMatrix(transposedMatrix, number);
+  return strongConnectivityMatrix;
+}
+
