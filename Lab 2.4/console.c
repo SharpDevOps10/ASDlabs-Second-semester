@@ -48,7 +48,7 @@ void aboutDirectedGraph() {
 
 
   printf("\nThis is a Directed Graph \n");
-  printf("\nInitial matrix\n");
+  printf("\n\tInitial matrix\n");
   typeMatrix(A);
 
 
@@ -62,7 +62,7 @@ void aboutDirectedGraph() {
   if(checkHomogeneity(summedDegrees)) {
     printf("%d\n", summedDegrees[0]);
   } else {
-    printf("The graph is not homogeneous ");
+    printf("\tThe graph is not homogeneous ");
   }
 
   printf("\nFind isolated vertices\n");
@@ -70,7 +70,7 @@ void aboutDirectedGraph() {
   if(isolated[0]) {
     printVertices(isolated);
   } else {
-    printf("No isolated vertices");
+    printf("\tNo isolated vertices");
   }
 
   printf("\nFind terminal vertices\n");
@@ -78,7 +78,7 @@ void aboutDirectedGraph() {
   if(terminal[0]) {
     printVertices(isolated);
   } else {
-    printf("No terminal vertices");
+    printf("\tNo terminal vertices");
   }
   freeMatrix(A, vertices);
 
@@ -92,8 +92,56 @@ void aboutDirectedGraph() {
 
 }
 
+void aboutUndirectedGraph() {
+  double coefficient = 1.0 - 0.01 - 0.01 - 0.3;
+  double **R = randm(vertices);
+  double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
+  int* degree = graphDegrees(C);
+
+  int* isolated = findIsolatedVertices(degree);
+  int* terminal = findTerminalVertices(degree);
+
+  printf("\nThis is a Undirected Graph \n");
+  printf("\n\tMatrix for Undirected Graph\n");
+  typeMatrix(C);
+
+  printf("Undirected graph degrees : ");
+  printDegrees(degree);
+
+  printf("\nIs the graph homogeneous?\n");
+  if(checkHomogeneity(degree)) {
+    printf("%d\n", degree[0]);
+  } else {
+    printf("\tThe graph is not homogeneous ");
+  }
+
+  printf("\nFind isolated vertices\n");
+  printf("Isolated vertices : ");
+  if(isolated[0]) {
+    printVertices(isolated);
+  } else {
+    printf("\tNo isolated vertices");
+  }
+
+  printf("\nFind terminal vertices\n");
+  printf("Terminal vertices : ");
+  if(terminal[0]) {
+    printVertices(isolated);
+  } else {
+    printf("\tNo terminal vertices");
+  }
+  freeMatrix(C, vertices);
+
+  free(degree);
+  free(isolated);
+  free(terminal);
+
+}
+
+
 int main() {
-  aboutDirectedGraph();
+  //aboutDirectedGraph();
+  aboutUndirectedGraph();
 }
 
 

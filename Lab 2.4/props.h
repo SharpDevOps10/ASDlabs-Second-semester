@@ -12,5 +12,6 @@ int* findIsolatedVertices(const int* degreesArray);
 int* findTerminalVertices(const int* degreesArray);
 int checkHomogeneity(const int* degreesArray);
 void freeMatrix(double **matrix, int n);
-
+double **symmetricMatrix(double **matrix, int n);
+int* graphDegrees(double** matrix);
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 void freeMatrix(double **matrix, int n);
+
 int* graphDegrees(double** matrix) {
   const int number = vertices;
   int* vertexDegree;
