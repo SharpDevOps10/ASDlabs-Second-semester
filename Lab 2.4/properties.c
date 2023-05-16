@@ -11,8 +11,8 @@ int* graphDegrees(double** matrix) {
   for (int i = 0; i < number; ++i) {
     vertexDegreeCounter = 0;
     for (int j = 0; j < number; ++j) {
-      if(matrix[i][j] && i == j) vertexDegreeCounter +=2;
-      else vertexDegreeCounter++;
+      if(matrix[i][j] && i == j) vertexDegreeCounter += 2;
+      else if(matrix[i][j]) vertexDegreeCounter++;
     }
     vertexDegree[i] = vertexDegreeCounter;
   }
