@@ -138,10 +138,86 @@ void aboutUndirectedGraph() {
 
 }
 
+void aboutModifiedGraph() {
+  double** K = randm(vertices);
+  double modifiedCoefficient = 1.0 - 0.005 - 0.005 - 0.27;
+  double** D = mulmr(modifiedCoefficient, K, vertices);
+  int* entry = halfDegreeEntry(D);
+  int* exit = halfDegreeExit(D);
+  int* summedDegrees = summarizeHalfDegrees(exit, entry);
+  double** squaredMatrix = multiplyMatrices(D,D);
+  double** cubedMatrix = multiplyMatrices(squaredMatrix, D);
+
+  int* isolated = findIsolatedVertices(summedDegrees);
+  int* terminal = findTerminalVertices(summedDegrees);
+
+  double** reachabilityMatrix = calculateReachabilityMatrix(D);
+  double** connectivityMatrix = strongConnectivityMatrix(reachabilityMatrix);
+
+  double** strongComponents = findStrongComponents(connectivityMatrix);
+  printf("\nThis is a Modified Graph \n");
+  printf("\n\tMatrix for Modified Graph\n");
+  typeMatrix(D);
+
+  printf("Exit degree : ");
+  printDegrees(exit);
+
+  printf("Entry degree : ");
+  printDegrees(entry);
+
+  printf("\nIs the graph homogeneous?\n");
+  if(checkHomogeneity(summedDegrees)) {
+    printf("%d\n", summedDegrees[0]);
+  } else {
+    printf("\tThe graph is not homogeneous ");
+  }
+
+  printf("\nFind isolated vertices\n");
+  printf("Isolated vertices : ");
+  if(isolated[0]) {
+    printVertices(isolated);
+  } else {
+    printf("\tNo isolated vertices");
+  }
+
+  printf("\nFind terminal vertices\n");
+  printf("Terminal vertices : ");
+  if(terminal[0]) {
+    printVertices(isolated);
+  } else {
+    printf("\tNo terminal vertices");
+  } //Paths of length 2
+
+  printf("\nMatrix squared : 2\n");
+  typeMatrix(squaredMatrix);
+
+  printf("\nMatrix cubed : 3\n");
+  typeMatrix(cubedMatrix);
+
+  printf("\nReachability Matrix of Mod graph\n");
+  typeMatrix(reachabilityMatrix);
+
+  printf("\nConnected Matrix of Mod graph\n");
+  typeMatrix(connectivityMatrix);
+
+  printf("\nStrongly Connected Components\n");
+
+  printf("\n**Condensation Graph Adjacency Matrix**\n");
+  condensationMatrix(strongComponents);
+
+
+
+
+
+
+
+}
+
 
 int main() {
-  //aboutDirectedGraph();
-  aboutUndirectedGraph();
+  aboutDirectedGraph();
+  //aboutModifiedGraph();
+  //aboutUndirectedGraph();
 }
 
 

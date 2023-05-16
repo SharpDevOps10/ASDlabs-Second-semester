@@ -14,4 +14,9 @@ int checkHomogeneity(const int* degreesArray);
 void freeMatrix(double **matrix, int n);
 double **symmetricMatrix(double **matrix, int n);
 int* graphDegrees(double** matrix);
+double** multiplyMatrices(double** AMatrix, double** BMatrix);
+double** strongConnectivityMatrix(double **reachabilityMatrix);
+double** calculateReachabilityMatrix(double** matrix);
+double** findStrongComponents(double** strongMatrix);
+void condensationMatrix(double** strongComponents);
 #endif
