@@ -221,7 +221,6 @@ double** findStrongComponents(double** strongMatrix) {
 
   free(visitedVertex);
   return connectedComponents;
-
 }
 
 double** strongConnectivityMatrix(double **reachabilityMatrix) {
@@ -237,4 +236,34 @@ double** strongConnectivityMatrix(double **reachabilityMatrix) {
   freeMatrix(transposedMatrix, number);
   return strongConnectivityMatrix;
 }
+
+void condensationMatrix(double** strongComponents) {
+  const int number = vertices;
+  int verticesAmount = 0;
+  for (int i = 0; i < number; ++i) {
+    if (strongComponents[0][i] == 0) verticesAmount++;
+  }
+  double **matrix = calloc(number, sizeof(double *));
+  for (int i = 0; i < number; i++) {
+    matrix[i] = calloc(number, sizeof(double));
+  }
+
+  int position = 1;
+  for (int i = 0; i < number; ++i) {
+    if(strongComponents[0][position++] == 0) matrix[0][position++] = 1;
+  }
+
+  for (int i = 0; i < number; i++) {
+    for (int j = 0; j < number; j++) {
+      printf("%.0lf  ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+
+  freeMatrix(matrix, number);
+
+}
+
+
+
 
