@@ -225,8 +225,14 @@ void aboutModifiedGraph() {
   printf("\nMatrix squared : 2\n");
   typeMatrix(squaredMatrix);
 
+  printf("\nPathways with length : 2\n");
+  printPathways(squaredMatrix);
+
   printf("\nMatrix cubed : 3\n");
   typeMatrix(cubedMatrix);
+
+  printf("\nPathways with length : 3\n");
+  printPathways(cubedMatrix);
 
   printf("\nReachability Matrix of Mod graph\n");
   typeMatrix(reachabilityMatrix);
@@ -234,17 +240,25 @@ void aboutModifiedGraph() {
   printf("\nConnected Matrix of Mod graph\n");
   typeMatrix(connectivityMatrix);
 
-  printf("\nStrongly Connected Components\n");
+  printf("\nStrongly Connected Components of Mod Graph\n");
+  printComponents(strongComponents,vertices);
 
   printf("\n**Condensation Graph Adjacency Matrix**\n");
   condensationMatrix(strongComponents);
 
+  freeMatrix(D,vertices);
+  freeMatrix(squaredMatrix, vertices);
+  freeMatrix(cubedMatrix, vertices);
+  freeMatrix(reachabilityMatrix, vertices);
+  freeMatrix(connectivityMatrix, vertices);
+  freeMatrix(strongComponents, vertices);
 
 
-
-
-
-
+  free(isolated);
+  free(terminal);
+  free(summedDegrees);
+  free(entry);
+  free(exit);
 }
 
 
