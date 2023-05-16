@@ -31,6 +31,17 @@ void printVertices(int* verticesNumber) {
   printf("}\n");
 }
 
+void printPathways(double** matrix) {
+  const int numbers = vertices;
+  for (int i = 0; i < numbers; i++) {
+    for (int j = 0; j < numbers; j++) {
+      if (*(*(matrix + i) + j) != 0) {
+        printf("%d to %d;  ", i + 1, j + 1);
+      }
+    }
+    printf("\n");
+  }
+}
 
 void aboutDirectedGraph() {
 
