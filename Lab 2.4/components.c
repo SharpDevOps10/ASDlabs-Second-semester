@@ -61,16 +61,7 @@ int* summarizeHalfDegrees(const int* exit, const int* entry) {
   return vertexDegree;
 }
 
-int* calculateTotalDegrees(const int* exit, const int* entry) {
-  const int number = vertices;
-  int* vertexDegree;
-  vertexDegree = malloc(number * sizeof(int));
-  for (int i = 0; i < number; ++i) {
-    vertexDegree[i] = exit[i] + entry[i];
-  }
 
-  return vertexDegree;
-}
 
 int* findTerminalVertices(const int* degreesArray) {
   const int number = vertices;
@@ -198,6 +189,19 @@ void dfs(double** graph, int startVertex, double* component, int* visited) {
       }
     }
   }
+}
+
+double** transposeMatrix(double** matrix,  int number) {
+  number = vertices;
+  double **transposedMatrix = malloc(number * sizeof(double*));
+  for (int i = 0; i < number; ++i) {
+    transposedMatrix[i] = malloc(number * sizeof(double ));
+    for (int j = 0; j < number; ++j) {
+      transposedMatrix[i][j] = matrix[j][i];
+    }
+  }
+  return transposedMatrix;
+
 }
 
 
