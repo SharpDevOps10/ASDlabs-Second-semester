@@ -1,7 +1,60 @@
 #define vertices 12
 #include <stdlib.h>
 #include <stdio.h>
-void freeMatrix(double **matrix, int n);
+
+
+double **randm(int n) {
+  srand(2220);
+  double **matrix = (double **) malloc(sizeof(double *) * n);
+  for (int i = 0; i < n; i++) {
+    matrix[i] = (double *) malloc(sizeof(double) * n);
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
+    }
+  }
+  return matrix;
+
+}
+
+double **mulmr(double coef, double **matrix, int n) {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] *= coef;
+      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
+    }
+  }
+  return matrix;
+}
+
+void freeMatrix(double **matrix, int n) {
+  for (int i = 0; i < n; ++i) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+
+double **symmetricMatrix(double **matrix, int n) {
+  double **symmetrical = (double **) malloc(n * sizeof(double *));
+  for (int i = 0; i < n; ++i) {
+    symmetrical[i] = (double *) malloc(n * sizeof(double));
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      symmetrical[i][j] = matrix[i][j];
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (symmetrical[i][j] != symmetrical[j][i]) {
+        symmetrical[i][j] = 1;
+        symmetrical[j][i] = 1;
+      }
+    }
+  }
+  return symmetrical;
+}
 
 int* graphDegrees(double** matrix) {
   const int number = vertices;
@@ -148,45 +201,38 @@ void booleanConversion(double** matrix) {
 
 double** calculateReachabilityMatrix(double** matrix) {
   const int number = vertices;
-  double** copiedMatrix = copyMatrix(matrix);
-  double** reachabilityMatrix = copiedMatrix;
-  double** tempMatrix = copiedMatrix;
+  double **copy = copyMatrix(matrix);
+  double **sum = copy;
+  double **prev = copy;
+  double **tempPrev, **tempSum;
 
-  for (int i = 1; i < number - 1; ++i) {
-    double** resultedMatrix = multiplyMatrices(tempMatrix, matrix);
-    double** updatedMatrix = summarizeMatrices(reachabilityMatrix, resultedMatrix);
-    freeMatrix(reachabilityMatrix, number);
-    freeMatrix(tempMatrix, number);
-    tempMatrix = resultedMatrix;
-    reachabilityMatrix = updatedMatrix;
+  for (int i = 1; i < number - 1; i++) {
+    tempPrev = multiplyMatrices(prev, matrix);
+    tempSum = summarizeMatrices(sum, tempPrev);
+    freeMatrix(sum,number);
+    freeMatrix(prev,number);
+    prev = tempPrev;
+    sum = tempSum;
   }
-  for (int i = 0; i < number; ++i) {
-    reachabilityMatrix[i][i] += 1;
+
+  for (int i = 0; i < number; i++) {
+    sum[i][i] += 1;
   }
-  freeMatrix(tempMatrix, number);
-  booleanConversion(reachabilityMatrix);
-  return reachabilityMatrix;
+
+  freeMatrix(prev,number);
+  booleanConversion(sum);
+
+  return sum;
 }
 
 
-void dfs(double** graph, int startVertex, double* component, int* visited) {
+void depthFirstSearch(double** connectivityMatrix, int startVertex, double* component, int* visited) {
   const int number = vertices;
-  int stack[number];
-  int top = -1;
-
-  stack[++top] = startVertex;
   visited[startVertex] = 1;
   component[startVertex] = 1;
-
-  while (top >= 0) {
-    int currentVertex = stack[top--];
-
-    for (int i = 0; i < number; i++) {
-      if (!visited[i] && graph[currentVertex][i]) {
-        stack[++top] = i;
-        visited[i] = 1;
-        component[i] = 1;
-      }
+  for (int adjacentVertex = 0; adjacentVertex < number; ++adjacentVertex) {
+    if(!visited[adjacentVertex] && connectivityMatrix[startVertex][adjacentVertex]) {
+      depthFirstSearch(connectivityMatrix, adjacentVertex,component,visited);
     }
   }
 }
@@ -204,6 +250,21 @@ double** transposeMatrix(double** matrix,  int number) {
 
 }
 
+int countNonZeroEntries(double **matrix) {
+  int numVertices = vertices;
+  int count = 0;
+
+  for (int row = 0; row < numVertices; row++) {
+    for (int col = 0; col < numVertices; col++) {
+      if (matrix[row][col]) {
+        count++;
+        row++;
+      }
+    }
+  }
+  return count;
+}
+
 
 double** findStrongComponents(double** strongMatrix) {
   const int number = vertices;
@@ -215,7 +276,7 @@ double** findStrongComponents(double** strongMatrix) {
 
   for (int i = 0; i < number; ++i) {
     if(!visitedVertex[i]) {
-      dfs(strongMatrix, i, connectedComponents[i], visitedVertex);
+      depthFirstSearch(strongMatrix, i, connectedComponents[i], visitedVertex);
     }
   }
 
@@ -226,9 +287,9 @@ double** findStrongComponents(double** strongMatrix) {
 double** strongConnectivityMatrix(double **reachabilityMatrix) {
   const int number = vertices;
   double** transposedMatrix = transposeMatrix(reachabilityMatrix, number);
-  double **strongConnectivityMatrix = calloc(number, sizeof(double*));
+  double **strongConnectivityMatrix = malloc(number* sizeof(double*));
   for (int i = 0; i < number; i++) {
-    strongConnectivityMatrix[i] = calloc(number, sizeof(double));
+    strongConnectivityMatrix[i] = malloc(number* sizeof(double));
     for (int j = 0; j < number; j++) {
       strongConnectivityMatrix[i][j] = reachabilityMatrix[i][j] * transposedMatrix[i][j];
     }
@@ -238,31 +299,32 @@ double** strongConnectivityMatrix(double **reachabilityMatrix) {
 }
 
 void condensationMatrix(double** strongComponents) {
-  const int number = vertices;
-  int verticesAmount = 0;
-  for (int i = 0; i < number; ++i) {
-    if (strongComponents[0][i] == 0) verticesAmount++;
-  }
-  double **matrix = calloc(number, sizeof(double *));
-  for (int i = 0; i < number; i++) {
-    matrix[i] = calloc(number, sizeof(double));
+  int numComponents = countNonZeroEntries(strongComponents);
+
+  double **adjacencyMatrix = calloc(numComponents, sizeof(double*));
+  for (int i = 0; i < numComponents; i++) {
+    adjacencyMatrix[i] = calloc(numComponents, sizeof(double));
   }
 
   int position = 1;
-  for (int i = 0; i < number; ++i) {
-    if(strongComponents[0][position++] == 0) matrix[0][position++] = 1;
+  for (int i = 0; i < vertices; ++i) {
+    if(!strongComponents[0][i]) {
+      adjacencyMatrix[0][position] = 1;
+      position++;
+    }
   }
 
-  for (int i = 0; i < number; i++) {
-    for (int j = 0; j < number; j++) {
-      printf("%.0lf  ", matrix[i][j]);
+  for (int i = 0; i < numComponents; i++) {
+    for (int j = 0; j < numComponents; j++) {
+      printf("%.0lf  ", adjacencyMatrix[i][j]);
     }
     printf("\n");
   }
 
-  freeMatrix(matrix, number);
+  freeMatrix(adjacencyMatrix, vertices);
 
 }
+
 
 
 

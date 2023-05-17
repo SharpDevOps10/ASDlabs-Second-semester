@@ -4,6 +4,7 @@
 #include "props.h"
 
 
+
 void typeMatrix(double **matrix) {
   const int number = vertices;
   for (int i = 0; i < number; i++) {
@@ -36,7 +37,7 @@ void printPathways(double** matrix) {
   for (int i = 0; i < numbers; i++) {
     for (int j = 0; j < numbers; j++) {
       if (*(*(matrix + i) + j) != 0) {
-        printf("%d to %d;  ", i + 1, j + 1);
+        printf("%d -> %d;  ", i + 1, j + 1);
       }
     }
     printf("\n");
@@ -44,23 +45,20 @@ void printPathways(double** matrix) {
 }
 
 void printComponents(double **matrix, int number) {
-  number = vertices;
-  int numComponents = 1;
-  for (int i = 0; i < number; i++) {
-    int isNewGroup = 1;
-    printf("Component %d: { ", numComponents);
-    for (int j = 0; j < number; j++) {
-      if (matrix[i][j]) {
-        if (!isNewGroup) {
-          printf(", ");
-        }
-        printf("%d", j + 1);
-        isNewGroup = 0;
+  int n = vertices;
+  int counter = 1;
+  for (int i = 0; i < n; i++) {
+    int isNew = 1;
+    for (int j = 0; j < n; j++) {
+      if(matrix[i][j]) {
+        if (isNew) printf("Component %d: {  ", counter);
+        printf("%d  ", j + 1);
+        isNew = 0;
       }
     }
-    if (!isNewGroup) {
-      printf(" }\n");
-      numComponents++;
+    if (!isNew) {
+      counter++;
+      printf("}\n");
     }
   }
 }
@@ -220,7 +218,7 @@ void aboutModifiedGraph() {
     printVertices(isolated);
   } else {
     printf("\tNo terminal vertices");
-  } //Paths of length 2
+  } 
 
   printf("\nMatrix squared : 2\n");
   typeMatrix(squaredMatrix);
@@ -263,9 +261,12 @@ void aboutModifiedGraph() {
 
 
 int main() {
-  aboutDirectedGraph();
-  //aboutModifiedGraph();
+  //aboutDirectedGraph();
+  aboutModifiedGraph();
   //aboutUndirectedGraph();
+ /* system("pause");
+  return 0;*/
+  
 }
 
 
