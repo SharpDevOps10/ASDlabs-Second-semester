@@ -46,19 +46,19 @@ void printPathways(double** matrix) {
 
 void printComponents(double **matrix, int number) {
   int n = vertices;
-  int counter = 1;
+  int componentCount = 1;
   for (int i = 0; i < n; i++) {
-    int isNew = 1;
+    int isNewComponent = 1;
     for (int j = 0; j < n; j++) {
       if(matrix[i][j]) {
-        if (isNew) printf("Component %d: {  ", counter);
+        if (isNewComponent) printf("Component %d: [  ", componentCount);
         printf("%d  ", j + 1);
-        isNew = 0;
+        isNewComponent = 0;
       }
     }
-    if (!isNew) {
-      counter++;
-      printf("}\n");
+    if (!isNewComponent) {
+      componentCount++;
+      printf("]\n");
     }
   }
 }
