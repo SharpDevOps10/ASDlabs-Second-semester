@@ -244,6 +244,7 @@ void aboutModifiedGraph() {
   printf("\n**Condensation Graph Adjacency Matrix**\n");
   condensationMatrix(strongComponents);
 
+
   freeMatrix(D,vertices);
   freeMatrix(squaredMatrix, vertices);
   freeMatrix(cubedMatrix, vertices);

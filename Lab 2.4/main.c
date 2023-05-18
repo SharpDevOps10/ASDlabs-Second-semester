@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
+#include "props.h"
 #define vertices 12
 #define IDC_BUTTON 1
 #define IDC_BUTTON2 2
@@ -74,7 +75,7 @@ void freeMatrix(double **matrix, int n) {
   free(matrix);
 }
 
-void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
+/*void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
   for (int i = 0, y = initialY + 30; i < n; i++, y += 15) {
     for (int j = 0, x = initialX; j < n; j++, x += 13) {
       wchar_t buffer[2];
@@ -83,7 +84,7 @@ void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
     }
     MoveToEx(hdc, initialX, y, NULL);
   }
-}
+}*/
 
 void arrow(double fi, double px, double py, HDC hdc) {
   double lx, ly, rx, ry;
@@ -150,11 +151,13 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
 
 }
 
-void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
+void depictDirectedGraph(int n, int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
                          struct coordinates coordinates, double **matrix,
                          HPEN KPen, HPEN GPen, HDC hdc) {
-  for (int i = 0; i < vertices; i++) {
-    for (int j = 0; j < vertices; j++) {
+
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
       MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
       if ((j >= i && matrix[i][j] == 1) || (j <= i && matrix[i][j] == 1 && matrix[j][i] == 0)) {
         if (i == j) {
@@ -188,6 +191,7 @@ void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radius
 
     }
   }
+
 }
 
 void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
@@ -214,6 +218,7 @@ void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radi
   }
 
 }
+
 
 
 
@@ -299,6 +304,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               (HMENU) IDC_BUTTON3,
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
+      Button_modified = CreateWindow(
+              (LPCSTR) "BUTTON",
+              (LPCSTR) "Switch to Condensation",
+              WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+              1000,
+              600,
+              160,
+              50,
+              hWnd,
+              (HMENU) IDC_BUTTON4,
+              (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+              NULL);
       return 0;
   }
     case WM_COMMAND: {
@@ -318,6 +335,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
           state = 2;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
+        case IDC_BUTTON4:
+          state = 3;
+          InvalidateRect(hWnd, NULL, FALSE);
+          break;
       }
     }
     case WM_PAINT :
@@ -332,6 +353,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
       char *nn[vertices] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0"};
+
+
 
       struct coordinates coordinates;
 
@@ -365,14 +388,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       int initialXOofRandMatrix = 750;
       int initialYofRandMatrix = 150;
       TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
-      printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
+      //printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
 
       double **R = randm(vertices);
       double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
       int initialXOofSymmMatrix = initialXOofRandMatrix;
       int initialYofSymmMatrix = initialYofRandMatrix + 210;
       TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
-      printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+      //printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
 
 
       double** K = randm(vertices);
@@ -381,22 +404,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       int initialXOofModMatrix = initialXOofRandMatrix + 210;
       int initialYofModMatrix = initialYofRandMatrix;
       TextOutA(hdc, initialXOofModMatrix, initialYofModMatrix, (LPCSTR) L"Modified Matrix", 31);
-      printMatrix(D, vertices, initialXOofModMatrix, initialYofModMatrix, hdc);
+      //printMatrix(D, vertices, initialXOofModMatrix, initialYofModMatrix, hdc);
+
+      double **condensationMatrix = getCondensationAdjacencyByK(modifiedCoefficient);
+      double **matrix = formatMatrix(condensationMatrix);
+      double** reachabilityMatrix = calculateReachabilityMatrix(D);
+      double** connectivityMatrix = strongConnectivityMatrix(reachabilityMatrix);
+
+      int amount = countStrongComponents(connectivityMatrix);
+
 
 
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
       SelectObject(hdc, KPen);
+
+
      if (state == 0) {
-          depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+          depictDirectedGraph(vertices,circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                               coordinates, A, KPen, GPen, hdc);
-        } else {
+        }
+     if (state == 1) {
           depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                                 coordinates, C, KPen, GPen, hdc);
       }
      if (state == 2) {
-       depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+       depictDirectedGraph(vertices,circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                            coordinates, D, KPen, GPen, hdc);
      }
+
+      if (state == 3) {
+        depictDirectedGraph(vertices,circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                           coordinates, D, KPen, GPen, hdc);
+      }
+
+
 
       SelectObject(hdc, BPen);
       SelectObject(hdc, GetStockObject(DC_BRUSH));
@@ -414,6 +455,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       freeMatrix(A, vertices);
       freeMatrix(C, vertices);
+      freeMatrix(D, vertices);
+      freeMatrix(matrix, vertices);
     case WM_DESTROY:
       PostQuitMessage(0);
       break;

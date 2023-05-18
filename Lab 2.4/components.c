@@ -1,60 +1,9 @@
 #define vertices 12
 #include <stdlib.h>
 #include <stdio.h>
+#include "props.h"
 
 
-double **randm(int n) {
-  srand(2220);
-  double **matrix = (double **) malloc(sizeof(double *) * n);
-  for (int i = 0; i < n; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * n);
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
-    }
-  }
-  return matrix;
-
-}
-
-double **mulmr(double coef, double **matrix, int n) {
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] *= coef;
-      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
-    }
-  }
-  return matrix;
-}
-
-void freeMatrix(double **matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
-double **symmetricMatrix(double **matrix, int n) {
-  double **symmetrical = (double **) malloc(n * sizeof(double *));
-  for (int i = 0; i < n; ++i) {
-    symmetrical[i] = (double *) malloc(n * sizeof(double));
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      symmetrical[i][j] = matrix[i][j];
-    }
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (symmetrical[i][j] != symmetrical[j][i]) {
-        symmetrical[i][j] = 1;
-        symmetrical[j][i] = 1;
-      }
-    }
-  }
-  return symmetrical;
-}
 
 int* graphDegrees(double** matrix) {
   const int number = vertices;
@@ -324,7 +273,63 @@ void condensationMatrix(double** strongComponents) {
   freeMatrix(adjacencyMatrix, vertices);
 
 }
+double **formatMatrix(double **components) {
+  const int number = vertices;
+  double **matrix = calloc(number, sizeof(size_t*));
+  for (int i = 0; i < number; i++) {
+    matrix[i] = calloc(number, sizeof(double));
+  }
 
+  for(int i = 0; i < number; i++) {
+    if (!components[0][i]) matrix[1][i+1] = 1;
+  }
+
+  return matrix;
+}
+
+double **directedMatrix(double K) {
+  double **T = randm(vertices);
+  double **A = mulmr(K, T,vertices);
+  return A;
+}
+
+void dfss(double** strongMatrix, int vertex, int* visitedVertex) {
+  visitedVertex[vertex] = 1;
+
+  for (int i = 0; i < vertices; ++i) {
+    if (strongMatrix[vertex][i] && !visitedVertex[i]) {
+      dfss(strongMatrix, i, visitedVertex);
+    }
+  }
+}
+
+double **getCondensationAdjacencyByK(double K) {
+  double **matrix = directedMatrix(K);
+  double **reachability = calculateReachabilityMatrix(matrix);
+  double **connectivity = strongConnectivityMatrix(reachability);
+  double **components = findStrongComponents(connectivity);
+
+  freeMatrix(matrix, vertices);
+  freeMatrix(reachability,vertices);
+  freeMatrix(connectivity, vertices);
+  return components;
+}
+
+int countStrongComponents(double** strongMatrix) {
+  const int number = vertices;
+  int* visitedVertex = calloc(number, sizeof(int));
+  int count = 0;
+
+  for (int i = 0; i < number; ++i) {
+    if (!visitedVertex[i]) {
+      dfss(strongMatrix, i,  visitedVertex);
+      count++;
+    }
+  }
+
+  free(visitedVertex);
+  return count;
+}
 
 
 

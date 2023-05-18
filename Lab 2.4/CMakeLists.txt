@@ -3,4 +3,4 @@ project(Lab_2_4 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Lab_2_4 main.c console.c components.c)
+add_executable(Lab_2_4 main.c  components.c)
