@@ -21,70 +21,7 @@ struct coordinates {
 };
 
 
-double **randm(int n) {
-  srand(2220);
-  double **matrix = (double **) malloc(sizeof(double *) * n);
-  for (int i = 0; i < n; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * n);
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
-    }
-  }
-  return matrix;
 
-}
-
-double **mulmr(double coef, double **matrix, int n) {
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] *= coef;
-      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
-    }
-  }
-  return matrix;
-}
-
-
-double **symmetricMatrix(double **matrix, int n) {
-  double **symmetrical = (double **) malloc(n * sizeof(double *));
-  for (int i = 0; i < n; ++i) {
-    symmetrical[i] = (double *) malloc(n * sizeof(double));
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      symmetrical[i][j] = matrix[i][j];
-    }
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (symmetrical[i][j] != symmetrical[j][i]) {
-        symmetrical[i][j] = 1;
-        symmetrical[j][i] = 1;
-      }
-    }
-  }
-  return symmetrical;
-}
-
-void freeMatrix(double **matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
-/*void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
-  for (int i = 0, y = initialY + 30; i < n; i++, y += 15) {
-    for (int j = 0, x = initialX; j < n; j++, x += 13) {
-      wchar_t buffer[2];
-      swprintf(buffer, 2, L"%lf", matrix[i][j]);
-      TextOut(hdc, x, y, (LPCSTR) buffer, 1);
-    }
-    MoveToEx(hdc, initialX, y, NULL);
-  }
-}*/
 
 void arrow(double fi, double px, double py, HDC hdc) {
   double lx, ly, rx, ry;
@@ -245,7 +182,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
-                      1450,
+                      1200,
                       700,
                       (HWND) NULL,
                       (HMENU) NULL,
@@ -387,15 +324,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       int initialXOofRandMatrix = 750;
       int initialYofRandMatrix = 150;
-      TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
-      //printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
+
 
       double **R = randm(vertices);
       double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
       int initialXOofSymmMatrix = initialXOofRandMatrix;
       int initialYofSymmMatrix = initialYofRandMatrix + 210;
-      TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
-      //printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+
 
 
       double** K = randm(vertices);
@@ -403,11 +338,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       double** D = mulmr(modifiedCoefficient, K, vertices);
       int initialXOofModMatrix = initialXOofRandMatrix + 210;
       int initialYofModMatrix = initialYofRandMatrix;
-      TextOutA(hdc, initialXOofModMatrix, initialYofModMatrix, (LPCSTR) L"Modified Matrix", 31);
-      //printMatrix(D, vertices, initialXOofModMatrix, initialYofModMatrix, hdc);
 
-      double **condensationMatrix = getCondensationAdjacencyByK(modifiedCoefficient);
-      double **matrix = formatMatrix(condensationMatrix);
+
+      double **condensationMatrix = condensationMatrixWithCoef(modifiedCoefficient);
+      double **matrix = generateAdjacencyMatrixFromStrongComponents(condensationMatrix);
       double** reachabilityMatrix = calculateReachabilityMatrix(D);
       double** connectivityMatrix = strongConnectivityMatrix(reachabilityMatrix);
 
@@ -433,8 +367,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
      }
 
       if (state == 3) {
-        depictDirectedGraph(vertices,circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                           coordinates, D, KPen, GPen, hdc);
+        depictDirectedGraph(amount,circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                           coordinates, matrix, KPen, GPen, hdc);
       }
 
 
@@ -457,6 +391,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       freeMatrix(C, vertices);
       freeMatrix(D, vertices);
       freeMatrix(matrix, vertices);
+      freeMatrix(condensationMatrix, vertices);
+      freeMatrix(connectivityMatrix, vertices);
+      freeMatrix(reachabilityMatrix, vertices);
     case WM_DESTROY:
       PostQuitMessage(0);
       break;

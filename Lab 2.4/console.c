@@ -241,7 +241,7 @@ void aboutModifiedGraph() {
   printf("\nStrongly Connected Components of Mod Graph\n");
   printComponents(strongComponents,vertices);
 
-  printf("\n**Condensation Graph Adjacency Matrix**\n");
+  printf("\nMatrix of Condensation Graph\n");
   condensationMatrix(strongComponents);
 
 
@@ -262,12 +262,11 @@ void aboutModifiedGraph() {
 
 
 int main() {
-  //aboutDirectedGraph();
+
+  aboutDirectedGraph();
+  aboutUndirectedGraph();
   aboutModifiedGraph();
-  //aboutUndirectedGraph();
- /* system("pause");
-  return 0;*/
-  
+
 }
 
 

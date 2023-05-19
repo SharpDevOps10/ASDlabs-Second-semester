@@ -19,7 +19,7 @@ double** strongConnectivityMatrix(double **reachabilityMatrix);
 double** calculateReachabilityMatrix(double** matrix);
 double** findStrongComponents(double** strongMatrix);
 void condensationMatrix(double** strongComponents);
-double **formatMatrix(double **components);
-double **getCondensationAdjacencyByK(double K);
+double **generateAdjacencyMatrixFromStrongComponents(double **components);
+double **condensationMatrixWithCoef(double K);
 int countStrongComponents(double** strongMatrix);
 #endif

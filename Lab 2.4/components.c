@@ -5,6 +5,61 @@
 
 
 
+double **randm(int n) {
+  srand(2220);
+  double **matrix = (double **) malloc(sizeof(double *) * n);
+  for (int i = 0; i < n; i++) {
+    matrix[i] = (double *) malloc(sizeof(double) * n);
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
+    }
+  }
+  return matrix;
+
+}
+
+double **mulmr(double coef, double **matrix, int n) {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] *= coef;
+      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
+    }
+  }
+  return matrix;
+}
+
+
+double **symmetricMatrix(double **matrix, int n) {
+  double **symmetrical = (double **) malloc(n * sizeof(double *));
+  for (int i = 0; i < n; ++i) {
+    symmetrical[i] = (double *) malloc(n * sizeof(double));
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      symmetrical[i][j] = matrix[i][j];
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (symmetrical[i][j] != symmetrical[j][i]) {
+        symmetrical[i][j] = 1;
+        symmetrical[j][i] = 1;
+      }
+    }
+  }
+  return symmetrical;
+}
+
+void freeMatrix(double **matrix, int n) {
+  for (int i = 0; i < n; ++i) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+
+
 int* graphDegrees(double** matrix) {
   const int number = vertices;
   int* vertexDegree;
@@ -148,6 +203,12 @@ void booleanConversion(double** matrix) {
   }
 }
 
+double **directedMatrix(double K) {
+  double **T = randm(vertices);
+  double **A = mulmr(K, T,vertices);
+  return A;
+}
+
 double** calculateReachabilityMatrix(double** matrix) {
   const int number = vertices;
   double **copy = copyMatrix(matrix);
@@ -273,7 +334,7 @@ void condensationMatrix(double** strongComponents) {
   freeMatrix(adjacencyMatrix, vertices);
 
 }
-double **formatMatrix(double **components) {
+double **generateAdjacencyMatrixFromStrongComponents(double **components) {
   const int number = vertices;
   double **matrix = calloc(number, sizeof(size_t*));
   for (int i = 0; i < number; i++) {
@@ -287,11 +348,7 @@ double **formatMatrix(double **components) {
   return matrix;
 }
 
-double **directedMatrix(double K) {
-  double **T = randm(vertices);
-  double **A = mulmr(K, T,vertices);
-  return A;
-}
+
 
 void dfss(double** strongMatrix, int vertex, int* visitedVertex) {
   visitedVertex[vertex] = 1;
@@ -303,7 +360,7 @@ void dfss(double** strongMatrix, int vertex, int* visitedVertex) {
   }
 }
 
-double **getCondensationAdjacencyByK(double K) {
+double **condensationMatrixWithCoef(double K) {
   double **matrix = directedMatrix(K);
   double **reachability = calculateReachabilityMatrix(matrix);
   double **connectivity = strongConnectivityMatrix(reachability);
