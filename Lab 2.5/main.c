@@ -206,6 +206,19 @@ void breadthFirstSearch(double** adjacencyMatrix, int startVertex, int* queue, d
       }
     }
   }
+}
+
+int findFirstArch(double** matrix, int n) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < i; ++j) {
+      double forwardArch = matrix[i][j];
+      double backwardArch = matrix[j][i];
+      if (forwardArch == 1 && backwardArch == 1) {
+        return i;
+      }
+    }
+  }
+  return -1;
 
 }
 
