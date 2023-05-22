@@ -184,6 +184,31 @@ void depthFirstSearch(double** adjacencyMatrix, int currentVertex, int* visited,
   }
 }
 
+void breadthFirstSearch(double** adjacencyMatrix, int startVertex, int* queue, double** tree) {
+  const int number = vertices;
+
+  int visited[number] = {0};
+
+  int queueStart = 0;
+  int queueFinish = -1;
+
+  queue[++queueFinish] = startVertex;
+  visited[startVertex] = 1;
+
+  while (queueStart <= queueFinish) {
+    int currentVertex = queue[queueStart++];
+
+    for (int neighborVertex = 0; neighborVertex < number; ++neighborVertex) {
+      if (adjacencyMatrix[currentVertex][neighborVertex] == 1 && !visited[neighborVertex]) {
+        tree[currentVertex][neighborVertex] = 1;
+        queue[++queueFinish] = neighborVertex;
+        visited[neighborVertex] = 1;
+      }
+    }
+  }
+
+}
+
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
@@ -204,12 +229,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) "Lab 5.  by Daniil Timofeev IM-22",
+                      (LPCSTR) "Lab 5.  by Daniil Timofeev from IM-22",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
-                      1000,
-                      700,
+                      1200,
+                      750,
                       (HWND) NULL,
                       (HMENU) NULL,
                       (HINSTANCE) hInstance,
@@ -309,7 +334,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
       double **T = randm(vertices);
-      double coefficient = 1.0 - 0.02 - 0.005 - 0.25;
+      double coefficient = 1.0 - 0.01 - 0.005 - 0.15;
       double **A = mulmr(coefficient, T, vertices);
 
       int initialXOofRandMatrix = 750;
