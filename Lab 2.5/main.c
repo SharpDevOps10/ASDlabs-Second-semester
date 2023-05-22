@@ -168,6 +168,22 @@ void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radius
   }
 }
 
+void depthFirstSearch(double** adjacencyMatrix, int currentVertex, int* visited, int* depthVertices, double** tree, int* numVisited) {
+  const int number = vertices;
+  visited[currentVertex] = 1;
+  depthVertices[(*numVisited)] = currentVertex;
+  (*numVisited)++;
+
+  for (int neighborVertex = 0; neighborVertex < number; ++neighborVertex) {
+    if (adjacencyMatrix[currentVertex][neighborVertex] == 1 && !visited[neighborVertex]) {
+
+      tree[currentVertex][neighborVertex] = 1;
+      depthFirstSearch(adjacencyMatrix, neighborVertex, visited, depthVertices, tree, numVisited);
+
+    }
+  }
+}
+
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
