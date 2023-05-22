@@ -222,6 +222,32 @@ int findFirstArch(double** matrix, int n) {
 
 }
 
+double** createTraversalMatrix(const int* arr) {
+  const int rows = vertices;
+  const int columns = vertices;
+
+  double** traversalMatrix = (double**)malloc(rows * sizeof(double*));
+  for (int i = 0; i < rows; i++)
+  {
+    traversalMatrix[i] = (double*)malloc(columns * sizeof(double));
+    for (int j = 0; j < columns; j++)
+    {
+      traversalMatrix[i][j] = 0.0;
+    }
+  }
+
+
+  for (int i = 0; i < vertices; i++)
+  {
+    int vertexIndex = arr[i];
+    int numberIndex = i;
+    traversalMatrix[vertexIndex][numberIndex] = 1.0;
+  }
+
+  return traversalMatrix;
+
+}
+
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
