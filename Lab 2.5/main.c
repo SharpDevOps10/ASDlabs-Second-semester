@@ -257,6 +257,24 @@ double** createTraversalMatrix(const int* arr) {
 
 }
 
+void runDfsForNotVisitedVertices(int currentVertex, double** adjacencyMatrix,
+                                 int* visited, int amount, int* depthVertices, double** graph ) {
+
+  const int number = vertices;
+
+  for (int i = 0; i < number; ++i) {
+    visited[i] =0;
+  }
+
+  for (int i = 0; i < number; ++i) {
+    if (visited[i] == 0) {
+      depthFirstSearch(adjacencyMatrix, currentVertex, visited, depthVertices,graph, &amount);
+    }
+
+  }
+
+}
+
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
