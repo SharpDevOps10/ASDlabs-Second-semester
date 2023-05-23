@@ -222,6 +222,15 @@ int findFirstArch(double** matrix, int n) {
 
 }
 
+void constructSearchMatrix(const double** graph, int sourceVertex, double** searchMatrix) {
+  const int number = vertices;
+  if (graph == NULL || searchMatrix == NULL) return;
+
+  for (int i = 0; i < number; ++i) {
+    if (graph[i][sourceVertex]) searchMatrix[i][sourceVertex] = 1;
+  }
+}
+
 double** createTraversalMatrix(const int* arr) {
   const int rows = vertices;
   const int columns = vertices;
