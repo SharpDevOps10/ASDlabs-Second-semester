@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
+#include "props.h"
 #define vertices 12
 #define IDC_BUTTON 1
 #define IDC_BUTTON2 2
@@ -16,42 +17,6 @@ struct coordinates {
     double loopX[vertices];
     double loopY[vertices];
 };
-
-
-double **randm(int n) {
-  srand(2220);
-  double **matrix = (double **) malloc(sizeof(double *) * n);
-  for (int i = 0; i < n; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * n);
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] = (double) (rand() * 2.0) / (double) RAND_MAX;
-    }
-  }
-  return matrix;
-
-}
-
-double **mulmr(double coef, double **matrix, int n) {
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      matrix[i][j] *= coef;
-      matrix[i][j] = matrix[i][j] < 1 ? 0 : 1;
-    }
-  }
-  return matrix;
-}
-
-
-
-void freeMatrix(double **matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
 void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
   for (int i = 0, y = initialY + 30; i < n; i++, y += 15) {
     for (int j = 0, x = initialX; j < n; j++, x += 13) {
@@ -168,114 +133,8 @@ void depictDirectedGraph(int centerX, int centerY, int radiusOfGraph, int radius
   }
 }
 
-void depthFirstSearch(double** adjacencyMatrix, int currentVertex, int* visited, int* depthVertices, double** tree, int* numVisited) {
-  const int number = vertices;
-  visited[currentVertex] = 1;
-  depthVertices[(*numVisited)] = currentVertex;
-  (*numVisited)++;
-
-  for (int neighborVertex = 0; neighborVertex < number; ++neighborVertex) {
-    if (adjacencyMatrix[currentVertex][neighborVertex] == 1 && !visited[neighborVertex]) {
-
-      tree[currentVertex][neighborVertex] = 1;
-      depthFirstSearch(adjacencyMatrix, neighborVertex, visited, depthVertices, tree, numVisited);
-
-    }
-  }
-}
-
-void breadthFirstSearch(double** adjacencyMatrix, int startVertex, int* queue, double** tree) {
-  const int number = vertices;
-
-  int visited[number] = {0};
-
-  int queueStart = 0;
-  int queueFinish = -1;
-
-  queue[++queueFinish] = startVertex;
-  visited[startVertex] = 1;
-
-  while (queueStart <= queueFinish) {
-    int currentVertex = queue[queueStart++];
-
-    for (int neighborVertex = 0; neighborVertex < number; ++neighborVertex) {
-      if (adjacencyMatrix[currentVertex][neighborVertex] == 1 && !visited[neighborVertex]) {
-        tree[currentVertex][neighborVertex] = 1;
-        queue[++queueFinish] = neighborVertex;
-        visited[neighborVertex] = 1;
-      }
-    }
-  }
-}
-
-int findFirstArch(double** matrix, int n) {
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < i; ++j) {
-      double forwardArch = matrix[i][j];
-      double backwardArch = matrix[j][i];
-      if (forwardArch == 1 && backwardArch == 1) {
-        return i;
-      }
-    }
-  }
-  return -1;
-
-}
-
-void constructSearchMatrix(const double** graph, int sourceVertex, double** searchMatrix) {
-  const int number = vertices;
-  if (graph == NULL || searchMatrix == NULL) return;
-
-  for (int i = 0; i < number; ++i) {
-    if (graph[i][sourceVertex]) searchMatrix[i][sourceVertex] = 1;
-  }
-}
-
-double** createTraversalMatrix(const int* arr) {
-  const int rows = vertices;
-  const int columns = vertices;
-
-  double** traversalMatrix = (double**)malloc(rows * sizeof(double*));
-  for (int i = 0; i < rows; i++)
-  {
-    traversalMatrix[i] = (double*)malloc(columns * sizeof(double));
-    for (int j = 0; j < columns; j++)
-    {
-      traversalMatrix[i][j] = 0.0;
-    }
-  }
-
-
-  for (int i = 0; i < vertices; i++)
-  {
-    int vertexIndex = arr[i];
-    int numberIndex = i;
-    traversalMatrix[vertexIndex][numberIndex] = 1.0;
-  }
-
-  return traversalMatrix;
-
-}
-
-void runDfsForNotVisitedVertices(int currentVertex, double** adjacencyMatrix,
-                                 int* visited, int amount, int* depthVertices, double** graph ) {
-
-  const int number = vertices;
-
-  for (int i = 0; i < number; ++i) {
-    visited[i] =0;
-  }
-
-  for (int i = 0; i < number; ++i) {
-    if (visited[i] == 0) {
-      depthFirstSearch(adjacencyMatrix, currentVertex, visited, depthVertices,graph, &amount);
-    }
-
-  }
-
-}
-
-
+int dfsIterationAmount = 0;
+int bfsIterationAmount = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
@@ -295,11 +154,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) "Lab 5.  by Daniil Timofeev from IM-22",
+                      (LPCSTR) "Lab 5. by Daniil Timofeev from IM-22",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
-                      1200,
+                      1500,
                       750,
                       (HWND) NULL,
                       (HMENU) NULL,
@@ -316,14 +175,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   HDC hdc;
   PAINTSTRUCT ps;
-  HWND Button_directed;
-  HWND Button_undirected;
+  HWND ButtonForDFS;
+  HWND ButtonForBFS;
+  const int numVertices = vertices;
   int state = 0;
+
+  double **T = randm(vertices);
+  double coefficient = 1.0 - 0.01 - 0.005 - 0.15;
+  double **A = mulmr(coefficient, T, vertices);
+
+
+  int* visitedVertex = malloc(vertices * sizeof(int));
+  int* depthVertices = malloc(vertices * sizeof(int));
+  int* queue = malloc(vertices * sizeof(int));
+  int birthVertex = findFirstArch(A, vertices);
+  double** dfsTree = createMatrix(vertices);
+  double** bfsTree = createMatrix(vertices);
+  chargeWithZero(dfsTree, vertices);
+  chargeWithZero(bfsTree, vertices);
+
+  runDfsForNotVisitedVertices(birthVertex, A, visitedVertex, 0, depthVertices, dfsTree);
+  breadthFirstSearch(A, birthVertex, queue, bfsTree);
+
+
   switch (messg) {
     case WM_CREATE: {
-      Button_directed = CreateWindow(
+      ButtonForDFS = CreateWindow(
               (LPCSTR) "BUTTON",
-              (LPCSTR) "Switch to Directed",
+              (LPCSTR) "Next Step: DFS",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               30,
@@ -333,9 +212,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
               (HMENU) IDC_BUTTON,
               (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
               NULL);
-      Button_undirected = CreateWindow(
+      ButtonForBFS = CreateWindow(
               (LPCSTR) "BUTTON",
-              (LPCSTR) "Switch to Undirected",
+              (LPCSTR) "Next Step: BFS",
               WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
               700,
               600,
@@ -352,11 +231,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
         case IDC_BUTTON:
           state = 0;
+          if (dfsIterationAmount < numVertices) dfsIterationAmount++;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
 
         case IDC_BUTTON2:
           state = 1;
+          if (bfsIterationAmount < numVertices) bfsIterationAmount++;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
       }
@@ -367,6 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
       HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
       HPEN GPen = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
+      HPEN APen = CreatePen(PS_SOLID, 2, RGB(0, 255, 255));
       HPEN NoPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
       SelectObject(hdc, NoPen);
       Rectangle(hdc, 0, 0, 670, 700);
@@ -398,15 +280,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
       }
 
-
-      double **T = randm(vertices);
-      double coefficient = 1.0 - 0.01 - 0.005 - 0.15;
-      double **A = mulmr(coefficient, T, vertices);
-
       int initialXOofRandMatrix = 750;
       int initialYofRandMatrix = 150;
+      double** dfsDetour = createTraversalMatrix(depthVertices);
+      double** bfsDetour = createTraversalMatrix(queue);
       TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
       printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
+
+      TextOut(hdc, initialXOofRandMatrix+200, initialYofRandMatrix, (LPCSTR) L"DFS Relativity", 28);
+      printMatrix(dfsDetour, vertices, initialXOofRandMatrix + 200, initialYofRandMatrix, hdc);
+      TextOut(hdc, initialXOofRandMatrix+400, initialYofRandMatrix, (LPCSTR) L"DFS Tree", 15);
+      printMatrix(dfsTree, vertices, initialXOofRandMatrix + 400, initialYofRandMatrix, hdc);
+
+      TextOut(hdc, initialXOofRandMatrix+200, initialYofRandMatrix+250, (LPCSTR) L"BFS Relativity", 28);
+      printMatrix(bfsDetour, vertices, initialXOofRandMatrix + 200, initialYofRandMatrix + 250, hdc);
+      TextOut(hdc, initialXOofRandMatrix+400, initialYofRandMatrix+250, (LPCSTR) L"BFS Tree", 15);
+      printMatrix(bfsTree, vertices, initialXOofRandMatrix + 400, initialYofRandMatrix + 250, hdc);
+
+
+
+
 
 
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
@@ -415,6 +308,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       if (state == 0) {
         depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
                             coordinates, A, KPen, GPen, hdc);
+      }
 
         SelectObject(hdc, BPen);
         SelectObject(hdc, GetStockObject(DC_BRUSH));
@@ -437,7 +331,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
         break;
         default:
           return (DefWindowProc(hWnd, messg, wParam, lParam));
-      }
-      return 0;
+
   }
+  return 0;
 }
