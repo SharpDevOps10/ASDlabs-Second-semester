@@ -9,7 +9,7 @@ void freeMatrix(double **matrix, int n);
 void depthFirstSearch(double** adjacencyMatrix, int currentVertex, int* visited, int* depthVertices, double** tree, int* numVisited);
 void breadthFirstSearch(double** adjacencyMatrix, int startVertex, int* queue, double** tree);
 int findFirstArch(double** matrix, int n);
-void constructSearchMatrix(const double** graph, int sourceVertex, double** searchMatrix);
+void constructSearchMatrix(double** graph, int sourceVertex, double** searchMatrix);
 double** createTraversalMatrix(const int* arr);
 void runDfsForNotVisitedVertices(int currentVertex, double** adjacencyMatrix,
                                  int* visited, int amount, int* depthVertices, double** graph );

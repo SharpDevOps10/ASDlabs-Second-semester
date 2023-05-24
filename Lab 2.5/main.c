@@ -248,7 +248,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
       HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
       HPEN GPen = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
-      HPEN APen = CreatePen(PS_SOLID, 2, RGB(0, 255, 255));
+      HPEN OPen = CreatePen(PS_SOLID, 2, RGB(255, 165, 0));
+      HPEN PPen = CreatePen(PS_SOLID, 2, RGB(255, 192, 203));
       HPEN NoPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
       SelectObject(hdc, NoPen);
       Rectangle(hdc, 0, 0, 670, 700);
@@ -302,13 +303,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
 
+
+
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
       SelectObject(hdc, KPen);
+      depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                          coordinates, A, KPen, GPen, hdc);
 
-      if (state == 0) {
-        depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                            coordinates, A, KPen, GPen, hdc);
-      }
 
         SelectObject(hdc, BPen);
         SelectObject(hdc, GetStockObject(DC_BRUSH));
@@ -321,8 +322,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
           TextOut(hdc, coordinates.nx[i] - dtx, coordinates.ny[i] - vertexRadius / 2, nn[i], 2);
         }
 
+        SelectObject(hdc, OPen);
+        SetDCBrushColor(hdc, RGB(255, 165, 0));
+
+      if (state == 0) {
+        double** modified = createMatrix(numVertices);
+        chargeWithZero(modified,numVertices);
+        for (int i = 0; i < dfsIterationAmount; ++i) {
+          constructSearchMatrix(dfsTree,depthVertices[i], modified);
+          depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                              coordinates, modified, OPen, GPen, hdc);
+          Ellipse(hdc, coordinates.nx[depthVertices[i]] - vertexRadius, coordinates.ny[depthVertices[i]] - vertexRadius,
+                  coordinates.nx[depthVertices[i]] + vertexRadius, coordinates.ny[depthVertices[i]] + vertexRadius);
+        }
+
+        for (int i = 0; i < dfsIterationAmount; i++)
+        {
+          wchar_t buffer[5];
+          swprintf(buffer, 5, L"%d", depthVertices[i] + 1);
+          TextOut(hdc, coordinates.nx[depthVertices[i]] - dtx, coordinates.ny[depthVertices[i]] - vertexRadius / 2, buffer, 3);
+        }
+
+        freeMatrix(modified,numVertices);
+
+      }
+
+      SelectObject(hdc, PPen);
+      SetDCBrushColor(hdc, RGB(255, 192, 203));
+
+      if (state == 1) {
+        double** modified = createMatrix(numVertices);
+        chargeWithZero(modified,numVertices);
+
+        for (int i = 0; i < bfsIterationAmount; ++i) {
+          constructSearchMatrix(bfsTree,queue[i], modified);
+          depictDirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                              coordinates, modified, BPen, GPen, hdc);
+
+          Ellipse(hdc, coordinates.nx[queue[i]] - vertexRadius, coordinates.ny[queue[i]] - vertexRadius,
+                  coordinates.nx[queue[i]] + vertexRadius, coordinates.ny[queue[i]] + vertexRadius);
+        }
+
+        for (int i = 0; i < bfsIterationAmount; i++)
+        {
+          wchar_t buffer[5];
+          swprintf(buffer, 5, L"%d", queue[i] + 1);
+          TextOut(hdc, coordinates.nx[queue[i]] - dtx, coordinates.ny[queue[i]] - vertexRadius / 2, buffer, 3);
+        }
+        freeMatrix(modified,numVertices);
+        
+      }
+
+
 
         EndPaint(hWnd, &ps);
+      break;
 
         freeMatrix(A, vertices);
 

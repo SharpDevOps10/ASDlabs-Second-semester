@@ -123,7 +123,7 @@ int findFirstArch(double** matrix, int n) {
 
 }
 
-void constructSearchMatrix(const double** graph, int sourceVertex, double** searchMatrix) {
+void constructSearchMatrix(double** graph, int sourceVertex, double** searchMatrix) {
   const int number = vertices;
 
   for (int i = 0; i < number; ++i) {
