@@ -376,9 +376,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
         EndPaint(hWnd, &ps);
-      break;
 
         freeMatrix(A, vertices);
+        free(queue);
+        free(depthVertices);
+        free(visitedVertex);
+        freeMatrix(dfsDetour, vertices);
+        freeMatrix(bfsDetour, vertices);
+        freeMatrix(dfsTree, vertices);
+        freeMatrix(bfsTree, vertices);
 
         case WM_DESTROY:
           PostQuitMessage(0);
