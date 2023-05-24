@@ -249,7 +249,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
       HPEN GPen = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
       HPEN OPen = CreatePen(PS_SOLID, 2, RGB(255, 165, 0));
-      HPEN PPen = CreatePen(PS_SOLID, 2, RGB(255, 192, 203));
+      HPEN PPen = CreatePen(PS_SOLID, 2, RGB(255, 0, 255));
       HPEN NoPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
       SelectObject(hdc, NoPen);
       Rectangle(hdc, 0, 0, 670, 700);
@@ -348,7 +348,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       }
 
       SelectObject(hdc, PPen);
-      SetDCBrushColor(hdc, RGB(255, 192, 203));
+      SetDCBrushColor(hdc, RGB(255, 0, 255));
 
       if (state == 1) {
         double** modified = createMatrix(numVertices);
