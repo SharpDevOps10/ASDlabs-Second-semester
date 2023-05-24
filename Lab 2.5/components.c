@@ -109,18 +109,28 @@ void breadthFirstSearch(double** adjacencyMatrix, int startVertex, int* queue, d
   }
 }
 
-int findFirstArch(double** matrix, int n) {
+int findStartVertex(double** matrix, int n) {
+  int* outgoingCounts = (int*)calloc(n, sizeof(int));
+
+
   for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < i; ++j) {
-      double forwardArch = matrix[i][j];
-      double backwardArch = matrix[j][i];
-      if (forwardArch == 1 && backwardArch == 1) {
-        return i;
+    for (int j = 0; j < n; ++j) {
+      if (matrix[i][j] == 1) {
+        outgoingCounts[i]++;
       }
     }
   }
-  return -1;
 
+
+  for (int i = 0; i < n; ++i) {
+    if (outgoingCounts[i] > 0) {
+      free(outgoingCounts);
+      return i;
+    }
+  }
+
+  free(outgoingCounts);
+  return -1;
 }
 
 void constructSearchMatrix(double** graph, int sourceVertex, double** searchMatrix) {

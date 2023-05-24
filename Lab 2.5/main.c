@@ -188,7 +188,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   int* visitedVertex = malloc(vertices * sizeof(int));
   int* depthVertices = malloc(vertices * sizeof(int));
   int* queue = malloc(vertices * sizeof(int));
-  int birthVertex = findFirstArch(A, vertices);
+  int birthVertex = findStartVertex(A, vertices);
   double** dfsTree = createMatrix(vertices);
   double** bfsTree = createMatrix(vertices);
   chargeWithZero(dfsTree, vertices);
