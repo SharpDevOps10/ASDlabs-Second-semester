@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 typedef struct Node {
-  int data;
-  struct Node *next;
+    int data;
+    struct Node* next;
 } Node;
 
 Node* createNode(int data) {
@@ -13,13 +14,9 @@ Node* createNode(int data) {
 }
 
 Node* insertNode(Node* head, int data) {
-  if (!head) {
-    head = createNode(data);
-  } else {
-    Node* newNode = createNode(data);
-    newNode->next = head;
-    head = newNode;
-  }
+  Node* newNode = createNode(data);
+  newNode->next = head;
+  head = newNode;
   return head;
 }
 
@@ -32,27 +29,54 @@ void printList(Node* head) {
   printf("\n");
 }
 
-void rearrangeList(Node** headRef, int n) {
-  Node* head = *headRef;
-  Node* mid = head;
+Node* reverseList(Node* head) {
   Node* prev = NULL;
-  for (int i = 0; i < n; i++) {
-    prev = mid;
-    mid = mid->next;
+  Node* current = head;
+  Node* next = NULL;
+
+  while (current) {
+    next = current->next;
+    current->next = prev;
+    prev = current;
+    current = next;
   }
-  prev->next = NULL;
+
+  return prev;
+}
+
+void rearrangeList(Node** headRef) {
+  Node* head = *headRef;
+  if (!head || !head->next)
+    return;
+
+  Node* slow = head;
+  Node* fast = head->next;
+
+  while (fast && fast->next) {
+    slow = slow->next;
+    fast = fast->next->next;
+  }
+
+  Node* secondHalf = slow->next;
+  slow->next = NULL;
+
+  secondHalf = reverseList(secondHalf);
+
   Node* current1 = head;
-  Node* current2 = mid;
-  Node* next1, * next2;
-  while (current1  && current2) {
+  Node* current2 = secondHalf;
+  Node* next1 = NULL;
+  Node* next2 = NULL;
+
+  while (current2) {
     next1 = current1->next;
     next2 = current2->next;
-    current2->next = next1;
+
     current1->next = current2;
+    current2->next = next1;
+
     current1 = next1;
     current2 = next2;
   }
-  *headRef = head;
 }
 
 void freeList(Node* head) {
@@ -65,21 +89,21 @@ void freeList(Node* head) {
 }
 
 int main() {
-  int n, data;
-  Node *head = NULL;
-  printf("Enter the value of n: ");
-  scanf("%d", &n);
-  for (int i = 0; i < 2 * n; i++) {
-    printf(" Enter a value for node %d : ", 2*n - i);
+  int data;
+  Node* head = NULL;
+  printf("Enter the values for the nodes (enter -1 to stop): \n");
+  while (1) {
+    printf("Enter a value: ");
     scanf("%d", &data);
+    if (data == -1)
+      break;
     head = insertNode(head, data);
   }
   printf("Original list: ");
   printList(head);
-  rearrangeList(&head, n);
+  rearrangeList(&head);
   printf("Rearranged list: ");
   printList(head);
   freeList(head);
-  system("pause");
   return 0;
-}
+}}
