@@ -14,9 +14,13 @@ Node* createNode(int data) {
 }
 
 Node* insertNode(Node* head, int data) {
-  Node* newNode = createNode(data);
-  newNode->next = head;
-  head = newNode;
+  if (!head) {
+    head = createNode(data);
+  } else {
+    Node* newNode = createNode(data);
+    newNode->next = head;
+    head = newNode;
+  }
   return head;
 }
 
@@ -27,21 +31,6 @@ void printList(Node* head) {
     ptr = ptr->next;
   }
   printf("\n");
-}
-
-Node* reverseList(Node* head) {
-  Node* prev = NULL;
-  Node* current = head;
-  Node* next = NULL;
-
-  while (current) {
-    next = current->next;
-    current->next = prev;
-    prev = current;
-    current = next;
-  }
-
-  return prev;
 }
 
 void rearrangeList(Node** headRef) {
@@ -57,25 +46,17 @@ void rearrangeList(Node** headRef) {
     fast = fast->next->next;
   }
 
-  Node* secondHalf = slow->next;
+  Node* current1 = head;
+  Node* current2 = slow->next;
   slow->next = NULL;
 
-  secondHalf = reverseList(secondHalf);
-
-  Node* current1 = head;
-  Node* current2 = secondHalf;
-  Node* next1 = NULL;
-  Node* next2 = NULL;
-
   while (current2) {
-    next1 = current1->next;
-    next2 = current2->next;
-
+    Node* temp1 = current1->next;
+    Node* temp2 = current2->next;
     current1->next = current2;
-    current2->next = next1;
-
-    current1 = next1;
-    current2 = next2;
+    current2->next = temp1;
+    current1 = temp1;
+    current2 = temp2;
   }
 }
 
@@ -106,4 +87,4 @@ int main() {
   printList(head);
   freeList(head);
   return 0;
-}}
+}
