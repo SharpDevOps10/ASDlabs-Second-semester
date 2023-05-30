@@ -44,27 +44,6 @@ double **mulmr(double coef, double **matrix, int n) {
 }
 
 
-double **symmetricMatrix(double **matrix, int n) {
-  double **symmetrical = (double **) malloc(n * sizeof(double *));
-  for (int i = 0; i < n; ++i) {
-    symmetrical[i] = (double *) malloc(n * sizeof(double));
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      symmetrical[i][j] = matrix[i][j];
-    }
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (symmetrical[i][j] != symmetrical[j][i]) {
-        symmetrical[i][j] = 1;
-        symmetrical[j][i] = 1;
-      }
-    }
-  }
-  return symmetrical;
-}
-
 void freeMatrix(double **matrix, int n) {
   for (int i = 0; i < n; ++i) {
     free(matrix[i]);
@@ -170,6 +149,25 @@ double** createWtMatrix(double** Wt, double** matrixC, double** matrixD, double*
     }
   }
   return Wt;
+}
+
+
+double **symmetricMatrix(double **matrix) {
+  const int number = vertices;
+  double **symmetricMatrix = createMatrix(number);
+  for (int i = 0; i < number; ++i) {
+    for (int j = 0; j < number; ++j) {
+      if (matrix[i][j] != matrix[j][i]) {
+        double symmetricValue = (matrix[i][j] == 0) ? matrix[j][i] : matrix[i][j];
+        symmetricMatrix[i][j] = symmetricValue;
+        symmetricMatrix[j][i] = symmetricValue;
+      } else {
+        symmetricMatrix[i][j] = matrix[i][j];
+      }
+    }
+
+  }
+  return symmetricMatrix;
 }
 
 void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc) {
@@ -386,11 +384,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
 
       double **R = randm(vertices);
-      double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
+      //double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
       int initialXOofSymmMatrix = initialXOofRandMatrix;
       int initialYofSymmMatrix = initialYofRandMatrix + 210;
       TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
-      printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
+      //printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
 
 
       SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
@@ -398,8 +396,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
 
 
 
-      depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                              coordinates, C, KPen, GPen, hdc);
+      /*depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
+                              coordinates, C, KPen, GPen, hdc);*/
 
 
       SelectObject(hdc, BPen);
@@ -417,7 +415,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       EndPaint(hWnd, &ps);
 
       freeMatrix(A, vertices);
-      freeMatrix(C, vertices);
+      /*freeMatrix(C, vertices);*/
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
