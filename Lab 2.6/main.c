@@ -11,22 +11,26 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char ProgName[] = "Lab 6";
 
 struct coordinates {
-    double nx[vertices];
-    double ny[vertices];
-    double loopX[vertices];
-    double loopY[vertices];
+  double nx[vertices];
+  double ny[vertices];
+  double loopX[vertices];
+  double loopY[vertices];
 };
 
-void printMatrix(double **matrix, int n, int initialX, int initialY, HDC hdc) {
-  for (int i = 0, y = initialY + 30; i < n; i++, y += 15) {
-    for (int j = 0, x = initialX; j < n; j++, x += 13) {
-      wchar_t buffer[2];
-      swprintf(buffer, 2, L"%lf", matrix[i][j]);
-      TextOut(hdc, x, y, (LPCSTR) buffer, 1);
-    }
-    MoveToEx(hdc, initialX, y, NULL);
-  }
-}
+struct vertexNode {
+  double edgeWeight;
+  struct vertexNode* nextNode;
+  int vertexIndex;
+};
+
+struct newEmpGraph {
+  struct vertexNode* head;
+  int vertexIndex;
+  struct newEmpGraph* futureVertex;
+};
+
+
+
 
 void arrow(double fi, double px, double py, HDC hdc) {
   double lx, ly, rx, ry;
@@ -251,7 +255,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
       int initialXOofRandMatrix = 750;
       int initialYofRandMatrix = 150;
       TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
-      printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
+      //printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
 
       double **R = randm(vertices);
       //double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);

@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+
+
+
 double **randm(int n) {
   srand(2220);
   double **matrix = (double **) malloc(sizeof(double *) * n);
@@ -141,4 +145,22 @@ double **symmetricMatrix(double **matrix) {
 
   }
   return symmetricMatrix;
+}
+
+void getEdge(int index, int number, double** adjacencyMatrix,double** weightMatrix, int* source, int* terminus, double* weight) {
+  int edgeCounter = -1;
+  for (int i = 0; i < number; ++i) {
+    for (int j = i; j < number; ++j) {
+      if (edgeCounter != index) {
+        if (adjacencyMatrix[i][j] == 1) {
+          edgeCounter++;
+          (*source) = i;
+          (*terminus) = j;
+          (*weight) = weightMatrix[i][j];
+        }
+      }
+
+    }
+  }
+
 }
