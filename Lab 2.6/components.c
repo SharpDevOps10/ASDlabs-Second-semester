@@ -147,6 +147,17 @@ double **symmetricMatrix(double **matrix) {
   return symmetricMatrix;
 }
 
+int countAmountOfEdges(double** matrix) {
+  const int number = vertices;
+  int counter = 0;
+  for (int i = 0; i < number; ++i) {
+    for (int j = i; j < number; ++j) {
+      if (matrix[i][j] == 1) counter++;
+    }
+  }
+  return counter;
+}
+
 void getEdge(int index, int number, double** adjacencyMatrix,double** weightMatrix, int* source, int* terminus, double* weight) {
   int edgeCounter = -1;
   for (int i = 0; i < number; ++i) {

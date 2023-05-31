@@ -26,7 +26,7 @@ struct vertexNode {
 struct newEmpGraph {
   struct vertexNode* head;
   int vertexIndex;
-  struct newEmpGraph* futureVertex;
+  struct newEmpGraph* upcomingVertex;
 };
 
 
@@ -97,6 +97,18 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
   SetWorldTransform(hdc, &initialMatrix);
 
 }
+
+
+struct newEmpGraph* discoverVertex(struct newEmpGraph* current, int desiredIndex) {
+
+  while (current->vertexIndex != desiredIndex) {
+    current = current->upcomingVertex;
+  }
+  return current;
+}
+
+
+
 
 
 
