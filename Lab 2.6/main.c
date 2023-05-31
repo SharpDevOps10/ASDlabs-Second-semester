@@ -107,6 +107,59 @@ struct newEmpGraph* discoverVertex(struct newEmpGraph* current, int desiredIndex
   return current;
 }
 
+struct newEmpGraph* generateNewGraph(double** adjacencyMatrix,double** weightMatrix, int amountOfEdges) {
+
+  const int number = vertices;
+  struct newEmpGraph* graph = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
+  graph->head = NULL;
+  graph->upcomingVertex = NULL;
+  struct newEmpGraph* presentVertex = graph;
+
+  for (int i = 0; i < number - 1; ++i) {
+    struct newEmpGraph* upcomingVertex = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
+    upcomingVertex->head = NULL;
+    upcomingVertex->upcomingVertex = NULL;
+    presentVertex->upcomingVertex = upcomingVertex;
+    presentVertex->vertexIndex = i;
+    presentVertex = presentVertex->upcomingVertex;
+  }
+  presentVertex->vertexIndex = number - 1;
+
+  for (int i = 0; i < amountOfEdges; ++i) {
+    int terminus = -1;
+    double weight = -1;
+    int source = -1;
+    getEdge(i, number, adjacencyMatrix, weightMatrix, &source, &terminus, &weight);
+
+    struct newEmpGraph* ongoingVertex = graph;
+    ongoingVertex = discoverVertex(presentVertex, source);
+
+    struct vertexNode* newVertexNode = (struct vertexNode*)malloc(sizeof(struct vertexNode));
+
+    newVertexNode->vertexIndex = terminus;
+    newVertexNode->edgeWeight = weight;
+
+    newVertexNode->nextNode = ongoingVertex->head;
+    ongoingVertex->head = newVertexNode;
+
+    if (source != terminus) {
+      struct newEmpGraph* terminusVertex = graph;
+      terminusVertex = discoverVertex(terminusVertex, terminus);
+
+      newVertexNode = (struct vertexNode*)malloc(sizeof(struct vertexNode));
+
+      newVertexNode->vertexIndex = source;
+      newVertexNode->edgeWeight = weight;
+      newVertexNode->nextNode = terminusVertex->head;
+
+      terminusVertex->head = newVertexNode;
+    }
+
+  }
+  return graph;
+
+}
+
 
 
 
