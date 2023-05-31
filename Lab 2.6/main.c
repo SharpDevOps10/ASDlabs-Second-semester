@@ -98,6 +98,20 @@ void depictArch(int startX, int startY, int finalX, int finalY, int archInterval
 
 }
 
+void releaseMemory(struct newEmpGraph* graph) {
+  while (graph != NULL) {
+    struct vertexNode* tempNode = graph->head;
+    while (tempNode != NULL) {
+      struct vertexNode* nextNode = tempNode->nextNode;
+      free(tempNode);
+      tempNode = nextNode;
+    }
+    struct newEmpGraph* upcomingVertex = graph->upcomingVertex;
+    free(graph);
+    graph = upcomingVertex;
+  }
+}
+
 
 struct newEmpGraph* discoverVertex(struct newEmpGraph* current, int desiredIndex) {
 
