@@ -158,7 +158,8 @@ int countAmountOfEdges(double** matrix) {
   return counter;
 }
 
-void getEdge(int index, int number, double** adjacencyMatrix,double** weightMatrix, int* source, int* terminus, double* weight) {
+void getEdge(int index, double** adjacencyMatrix,double** weightMatrix, int* source, int* terminus, double* weight) {
+  const int number = vertices;
   int edgeCounter = -1;
   for (int i = 0; i < number; ++i) {
     for (int j = i; j < number; ++j) {

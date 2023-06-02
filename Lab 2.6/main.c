@@ -32,176 +32,161 @@ struct newEmpGraph {
 
 
 
-void arrow(double fi, double px, double py, HDC hdc) {
-  double lx, ly, rx, ry;
-  lx = px + 15 * cos(fi + 0.3);
-  rx = px + 15 * cos(fi - 0.3);
-  ly = py + 15 * sin(fi + 0.3);
-  ry = py + 15 * sin(fi - 0.3);
-  MoveToEx(hdc, lx, ly, NULL);
-  LineTo(hdc, px, py);
-  LineTo(hdc, rx, ry);
-}
-
-
-void depictArch(int startX, int startY, int finalX, int finalY, int archInterval, HDC hdc) {
-  XFORM transformMatrix;
-  XFORM initialMatrix;
-  GetWorldTransform(hdc, &initialMatrix);
-
-  double angle = atan2(finalY - startY, finalX - startX) - M_PI / 2.0;
-  transformMatrix.eM11 = (FLOAT) cos(angle);
-  transformMatrix.eM12 = (FLOAT) sin(angle);
-  transformMatrix.eM21 = (FLOAT) (-sin(angle));
-  transformMatrix.eM22 = (FLOAT) cos(angle);
-  transformMatrix.eDx = (FLOAT) startX;
-  transformMatrix.eDy = (FLOAT) startY;
-  SetWorldTransform(hdc, &transformMatrix);
-
-  const double archWidthRatio = 0.75;
-  double archLength = sqrt((finalX - startX) * (finalX - startX) + (finalY - startY) * (finalY - startY));
-  double radiusOfVertex = 15.0;
-  double semiMinorAxis = archWidthRatio * archLength;
-  double semiMajorAxis = archLength / 2;
-
-  double ellipseStartY = semiMajorAxis;
-
-  double vertexAreaSquared = semiMajorAxis * semiMajorAxis * radiusOfVertex * radiusOfVertex;
-  double semiAxesSquared = semiMinorAxis * semiMinorAxis * semiMajorAxis * semiMajorAxis;
-  double distanceFromCenter = semiMinorAxis * semiMinorAxis * ellipseStartY * ellipseStartY;
-  double distanceFromVertex = semiMinorAxis * semiMinorAxis * radiusOfVertex * radiusOfVertex;
-  double semiMinorAxisPow = pow(semiMinorAxis, 4);
-
-  double intersection = semiMajorAxis *
-                        sqrt(vertexAreaSquared - semiAxesSquared + distanceFromCenter - distanceFromVertex +
-                             semiMinorAxisPow);
-  double semiMinorAxisSquaredEllipseStartY = semiMinorAxis * semiMinorAxis * ellipseStartY;
-  double denominator = -semiMajorAxis * semiMajorAxis + semiMinorAxis * semiMinorAxis;
-
-
-  double contactYRightTop = (semiMinorAxisSquaredEllipseStartY - intersection) / denominator;
-  double contactXRightTop = sqrt(radiusOfVertex * radiusOfVertex - contactYRightTop * contactYRightTop);
-  double contactYBottom = archLength - contactYRightTop;
-  double contactXLeftBottom = -contactXRightTop;
-
-  if (archInterval <= vertices / 2) {
-    Arc(hdc, -archWidthRatio * archLength, archLength, archWidthRatio * archLength, 0, 0, 0, 0, archLength);
-    double angleOfArrow = -atan2(archLength - contactYBottom, contactXLeftBottom) + 0.3 / 3;
-    arrow(angleOfArrow, contactXLeftBottom, contactYBottom, hdc);
-  } else {
-    Arc(hdc, -archWidthRatio * archLength, archLength, archWidthRatio * archLength, 0, 0, archLength, 0, 0);
-    double angleOfArrow = -atan2(archLength - contactYBottom, -contactXLeftBottom) - 0.3 / 3;
-    arrow(angleOfArrow, -contactXLeftBottom, contactYBottom, hdc);
-  }
-
-  SetWorldTransform(hdc, &initialMatrix);
-
-}
-
-void releaseMemory(struct newEmpGraph* graph) {
-  while (graph != NULL) {
-    struct vertexNode* tempNode = graph->head;
-    while (tempNode != NULL) {
-      struct vertexNode* nextNode = tempNode->nextNode;
-      free(tempNode);
-      tempNode = nextNode;
+void releaseMemory(struct newEmpGraph* pNewEmpGraph) {
+  while (pNewEmpGraph != NULL)
+  {
+    struct vertexNode* pVertexNode = pNewEmpGraph->head;
+    while (pVertexNode != NULL)
+    {
+      struct vertexNode* next_node = pVertexNode->nextNode;
+      free(pVertexNode);
+      pVertexNode = next_node;
     }
-    struct newEmpGraph* upcomingVertex = graph->upcomingVertex;
-    free(graph);
-    graph = upcomingVertex;
+    struct newEmpGraph* nextVertex = pNewEmpGraph->upcomingVertex;
+    free(pNewEmpGraph);
+    pNewEmpGraph = nextVertex;
   }
 }
 
 
-struct newEmpGraph* discoverVertex(struct newEmpGraph* current, int desiredIndex) {
-
-  while (current->vertexIndex != desiredIndex) {
-    current = current->upcomingVertex;
+struct newEmpGraph* discoverVertex(struct newEmpGraph* pEmpGraph, int desiredIndex) {
+  struct newEmpGraph* target = pEmpGraph;
+  while (target->vertexIndex != desiredIndex) {
+    target = target->upcomingVertex;
   }
-  return current;
+  return target;
 }
 
-struct newEmpGraph* generateNewGraph(double** adjacencyMatrix,double** weightMatrix, int amountOfEdges) {
 
-  const int number = vertices;
-  struct newEmpGraph* graph = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
-  graph->head = NULL;
-  graph->upcomingVertex = NULL;
-  struct newEmpGraph* presentVertex = graph;
+struct newEmpGraph* generateNewGraph(double** adjacencyMatrix, double** weightMatrix, int amountOfEdges) {
+  struct newEmpGraph* pNewEmpGraph = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
+  pNewEmpGraph->head = NULL;
+  pNewEmpGraph->upcomingVertex = NULL;
+  struct newEmpGraph* ongoing = pNewEmpGraph;
 
-  for (int i = 0; i < number - 1; ++i) {
-    struct newEmpGraph* upcomingVertex = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
-    upcomingVertex->head = NULL;
-    upcomingVertex->upcomingVertex = NULL;
-    presentVertex->upcomingVertex = upcomingVertex;
-    presentVertex->vertexIndex = i;
-    presentVertex = presentVertex->upcomingVertex;
+  for (int i = 0; i < vertices - 1; i++) {
+    struct newEmpGraph* upcoming = (struct newEmpGraph*)malloc(sizeof(struct newEmpGraph));
+    upcoming->head = NULL;
+    upcoming->upcomingVertex = NULL;
+    ongoing->upcomingVertex = upcoming;
+    ongoing->vertexIndex = i;
+    ongoing = ongoing->upcomingVertex;
   }
-  presentVertex->vertexIndex = number - 1;
+  ongoing->vertexIndex = vertices - 1;
 
-  for (int i = 0; i < amountOfEdges; ++i) {
+  for (int i = 0; i < amountOfEdges; i++) {
+    int source = -1;
     int terminus = -1;
     double weight = -1;
-    int source = -1;
-    getEdge(i, number, adjacencyMatrix, weightMatrix, &source, &terminus, &weight);
+    getEdge(i, adjacencyMatrix, weightMatrix, &source, &terminus, &weight);
 
-    struct newEmpGraph* ongoingVertex = graph;
-    ongoingVertex = discoverVertex(presentVertex, source);
+    struct newEmpGraph* ongoingVertex = pNewEmpGraph;
+    ongoingVertex = discoverVertex(ongoingVertex, source);
 
     struct vertexNode* newVertexNode = (struct vertexNode*)malloc(sizeof(struct vertexNode));
-
     newVertexNode->vertexIndex = terminus;
     newVertexNode->edgeWeight = weight;
-
     newVertexNode->nextNode = ongoingVertex->head;
     ongoingVertex->head = newVertexNode;
 
     if (source != terminus) {
-      struct newEmpGraph* terminusVertex = graph;
+      struct newEmpGraph* terminusVertex = pNewEmpGraph;
       terminusVertex = discoverVertex(terminusVertex, terminus);
 
       newVertexNode = (struct vertexNode*)malloc(sizeof(struct vertexNode));
-
       newVertexNode->vertexIndex = source;
       newVertexNode->edgeWeight = weight;
       newVertexNode->nextNode = terminusVertex->head;
-
       terminusVertex->head = newVertexNode;
+      terminusVertex = terminusVertex->upcomingVertex;
     }
-
   }
-  return graph;
+  return pNewEmpGraph;
+}
 
+void updateVisitedEdges(int visitedEdges[][vertices], int source, int terminus, HDC hdc, struct coordinates coordinates, struct vertexNode* pVertexNode, int radiusOfVertex, int dtx)
+{
+  if (visitedEdges[source][terminus] == 0 && visitedEdges[terminus][source] == 0)
+  {
+    visitedEdges[source][terminus] = 1;
+    visitedEdges[terminus][source] = 1;
+
+    LineTo(hdc, coordinates.nx[terminus], coordinates.ny[terminus]);
+    SetDCBrushColor(hdc, RGB(155, 180, 250));
+    HPEN linePen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+
+    char weight[4];
+    _itoa_s(pVertexNode->edgeWeight, weight, sizeof(weight), 10);
+
+    RECT textRect = {0};
+    DrawTextA(hdc, weight, strlen(weight), &textRect, DT_CALCRECT);
+
+    int textWidth = textRect.right - textRect.left;
+    int textHeight = textRect.bottom - textRect.top;
+
+    int srcX = coordinates.nx[source];
+    int srcY = coordinates.ny[source];
+
+    int destX = coordinates.nx[terminus];
+    int destY = coordinates.ny[terminus];
+
+    double differenceX = destX - srcX;
+    double differenceY = destY - srcY;
+
+    double centerX = srcX + differenceX / 3.0;
+    double centerY = srcY + differenceY / 3.0;
+
+    int offsetX = -textWidth / 2;
+    int offsetY = -textHeight / 2;
+
+    TextOutA(hdc, (int)centerX + offsetX, (int)centerY + offsetY, weight, strlen(weight));
+    SelectObject(hdc, linePen);
+  }
 }
 
 
 
+void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, int dtx, struct newEmpGraph* newEmpGraph, struct coordinates coordinates,
+                           HPEN PPen, HPEN BPen, HDC hdc)
+{
+  static int visitedEdges[vertices][vertices] = {0};
 
+  while (newEmpGraph != NULL)
+  {
+    struct vertexNode* node = newEmpGraph->head;
+    while (node != NULL)
+    {
+      int source = newEmpGraph->vertexIndex;
+      int terminus = node->vertexIndex;
+      MoveToEx(hdc, coordinates.nx[source], coordinates.ny[source], NULL);
 
+      HPEN ChangePen = CreatePen(PS_SOLID, 2, RGB(155, 180, 250));
+      SelectObject(hdc, ChangePen);
+      if (source == terminus)
+      {
 
-void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radiusOfVertex, int radiusOfLoop, double angle,
-                           struct coordinates coordinates, double **matrix,
-                           HPEN KPen, HPEN GPen, HDC hdc) {
-  for (int i = 0; i < vertices; ++i) {
-
-    for (int j = 0; j < vertices; ++j) {
-      MoveToEx(hdc, coordinates.nx[i], coordinates.ny[i], NULL);
-
-      if (matrix[i][j] == 1) {
-
-        if (i == j) {
-          SelectObject(hdc, GPen);
-          Ellipse(hdc, coordinates.loopX[i] - radiusOfLoop, coordinates.loopY[i] - radiusOfLoop,
-                  coordinates.loopX[i] + radiusOfLoop, coordinates.loopY[i] + radiusOfLoop);
-          SelectObject(hdc, KPen);
-        } else {
-          LineTo(hdc, coordinates.nx[j], coordinates.ny[j]);
-        }
-
+        SelectObject(hdc, PPen);
+        Ellipse(hdc, coordinates.loopX[source] - radiusOfLoop, coordinates.loopY[source] - radiusOfLoop, coordinates.loopX[source] + radiusOfLoop, coordinates.loopY[source] + radiusOfLoop);
+        SelectObject(hdc, ChangePen);
       }
+      else
+      {
+        updateVisitedEdges(visitedEdges, source, terminus, hdc, coordinates, node, radiusOfVertex, dtx);
+      }
+      node = node->nextNode;
     }
+    newEmpGraph = newEmpGraph->upcomingVertex;
   }
 
+  SelectObject(hdc, BPen);
+  SelectObject(hdc, GetStockObject(DC_BRUSH));
+  SetDCBrushColor(hdc, RGB(204, 204, 255));
+  for (int i = 0; i < vertices; i++) {
+    Ellipse(hdc, coordinates.nx[i] - radiusOfVertex, coordinates.ny[i] - radiusOfVertex, coordinates.nx[i] + radiusOfVertex, coordinates.ny[i] + radiusOfVertex);
+    wchar_t buffer[5];
+    swprintf(buffer, 5, L"%d", i + 1);
+    TextOut(hdc, coordinates.nx[i] - dtx, coordinates.ny[i] - radiusOfVertex / 2, buffer, 3);
+  }
 }
 
 
@@ -223,7 +208,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
   HWND hWnd;
   MSG lpMsg;
   hWnd = CreateWindow(ProgName,
-                      (LPCSTR) "Lab 3.  by Daniil Timofeev IM-22",
+                      (LPCSTR) "Lab 6.  by Daniil Timofeev IM-22",
                       WS_OVERLAPPEDWINDOW,
                       100,
                       100,
@@ -278,7 +263,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
     case WM_COMMAND: {
       switch (LOWORD(wParam)) {
 
-        case IDC_BUTTON:
+        /*case IDC_BUTTON:
           state = 0;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
@@ -286,89 +271,78 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
         case IDC_BUTTON2:
           state = 1;
           InvalidateRect(hWnd, NULL, FALSE);
-          break;
+          break;*/
       }
     }
     case WM_PAINT :
       hdc = BeginPaint(hWnd, &ps);
       SetGraphicsMode(hdc, GM_ADVANCED);
+
+
+      double** T = randm(vertices);
+      double coefficient = 1.0 - 0.01 - 0.005 - 0.05;
+      T = mulmr(coefficient, T, vertices);
+      double** A = symmetricMatrix(T);
+
+      double** R = randm(vertices);
+      multiplyByCoefficientMatrix(R, A);
+      double** Wt = roundm(R);
+
+      double** bMatrix = createBMatrix(Wt);
+      double** cMatrix = createCMatrix(bMatrix);
+      double** dMatrix = createDMatrix(bMatrix);
+      double** trMatrix = createTrMatrix();
+      Wt = createWtMatrix(Wt, cMatrix, dMatrix, trMatrix);
+      double** W = symmetricMatrix(Wt);
+
       HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
-      HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
-      HPEN GPen = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
+      HPEN PPen = CreatePen(PS_SOLID, 2, RGB(153, 0, 153));
+      HPEN RPen = CreatePen(PS_SOLID, 4, RGB(219, 56, 56));
       HPEN NoPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
+
       SelectObject(hdc, NoPen);
       Rectangle(hdc, 0, 0, 670, 700);
 
 
-      char *nn[vertices] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10\0", "11\0", "12\0"};
-
       struct coordinates coordinates;
-
-      double circleRadius = 200;
+      double circleRadius = 280;
       double vertexRadius = circleRadius / 12;
-
       double loopRadius = vertexRadius;
       double dtx = vertexRadius / 2.5;
-
       double circleCenterX = 370;
-      double circleCenterY = 360;
-
-
-      double angleAlpha = 2.0 * M_PI / (double) vertices;
-      for (int i = 0; i < vertices; i++) {
-
-        double sinAlpha = sin(angleAlpha * (double) i);
-        double cosAlpha = cos(angleAlpha * (double) i);
+      double circleCenterY = 340;
+      double angleAlpha = 2.0 * M_PI / (double)vertices;
+      for (int i = 0; i < vertices; i++)
+      {
+        double sinAlpha = sin(angleAlpha * (double)i);
+        double cosAlpha = cos(angleAlpha * (double)i);
         coordinates.nx[i] = circleCenterX + circleRadius * sinAlpha;
         coordinates.ny[i] = circleCenterY - circleRadius * cosAlpha;
         coordinates.loopX[i] = circleCenterX + (circleRadius + loopRadius) * sinAlpha;
         coordinates.loopY[i] = circleCenterY - (circleRadius + loopRadius) * cosAlpha;
-
       }
 
 
-      double **T = randm(vertices);
-      double coefficient = 1.0 - 0.01 - 0.005 - 0.05;
-      double **A = mulmr(coefficient, T, vertices);
 
-      int initialXOofRandMatrix = 750;
-      int initialYofRandMatrix = 150;
-      TextOut(hdc, initialXOofRandMatrix, initialYofRandMatrix, (LPCSTR) L"Initial Matrix", 28);
-      //printMatrix(A, vertices, initialXOofRandMatrix, initialYofRandMatrix, hdc);
+      int amountOfEdges = countAmountOfEdges(A);
+      struct newEmpGraph* pNewEmpGraph = generateNewGraph(A, W, amountOfEdges);
 
-      double **R = randm(vertices);
-      //double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
-      int initialXOofSymmMatrix = initialXOofRandMatrix;
-      int initialYofSymmMatrix = initialYofRandMatrix + 210;
-      TextOut(hdc, initialXOofSymmMatrix, initialYofSymmMatrix, (LPCSTR) L"Symmetric Matrix", 31);
-      //printMatrix(C, vertices, initialXOofSymmMatrix, initialYofSymmMatrix, hdc);
-
-
-      SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
-      SelectObject(hdc, KPen);
-
-
-
-      /*depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, angleAlpha,
-                              coordinates, C, KPen, GPen, hdc);*/
-
-
-      SelectObject(hdc, BPen);
-      SelectObject(hdc, GetStockObject(DC_BRUSH));
-      SetDCBrushColor(hdc, RGB(204, 204, 255));
       SetBkMode(hdc, TRANSPARENT);
-
-      for (int i = 0; i < vertices; ++i) {
-        Ellipse(hdc, coordinates.nx[i] - vertexRadius, coordinates.ny[i] - vertexRadius,
-                coordinates.nx[i] + vertexRadius, coordinates.ny[i] + vertexRadius);
-        TextOut(hdc, coordinates.nx[i] - dtx, coordinates.ny[i] - vertexRadius / 2, nn[i], 2);
-      }
+      depictUndirectedGraph(circleCenterX, circleCenterY, circleRadius, vertexRadius, loopRadius, dtx, pNewEmpGraph, coordinates, PPen, BPen, hdc);
 
 
       EndPaint(hWnd, &ps);
 
       freeMatrix(A, vertices);
-      /*freeMatrix(C, vertices);*/
+      freeMatrix(T, vertices);
+      freeMatrix(R, vertices);
+      freeMatrix(Wt, vertices);
+      freeMatrix(W, vertices);
+      freeMatrix(bMatrix, vertices);
+      freeMatrix(cMatrix, vertices);
+      freeMatrix(dMatrix, vertices);
+      freeMatrix(trMatrix, vertices);
+      releaseMemory(pNewEmpGraph);
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
