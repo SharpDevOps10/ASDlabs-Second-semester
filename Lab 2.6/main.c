@@ -189,6 +189,21 @@ void depictUndirectedGraph(int centerX, int centerY, int radiusOfGraph, int radi
   }
 }
 
+int checkChordExistence(struct newEmpGraph* sourceVertex, struct newEmpGraph* targetVertex, struct newEmpGraph* previousVertex) {
+  struct vertexNode* currentNode = sourceVertex->head;
+  while (currentNode != NULL) {
+    if (currentNode == previousVertex) {
+      currentNode = currentNode->nextNode;
+      continue;
+    }
+    if (currentNode == targetVertex) return 1;
+    if (checkChordExistence(currentNode->nextNode, targetVertex, sourceVertex) == 1) return 1;
+    currentNode = currentNode->nextNode;
+  }
+  return 0;
+}
+
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
