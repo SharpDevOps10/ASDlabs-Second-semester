@@ -204,6 +204,266 @@ int checkChordExistence(struct newEmpGraph* sourceVertex, struct newEmpGraph* ta
 }
 
 
+struct vertexNode* addVisited(struct vertexNode* visited, int vertexIndex) {
+  struct vertexNode* newNode = (struct vertexNode*)malloc(sizeof(struct vertexNode));
+  newNode->vertexIndex = vertexIndex;
+  newNode->nextNode = NULL;
+
+  if (visited == NULL) {
+    visited = newNode;
+  } else {
+    struct vertexNode* current = visited;
+    while (current->nextNode != NULL) {
+      current = current->nextNode;
+    }
+    current->nextNode = newNode;
+  }
+
+  return visited;
+}
+
+
+struct vertexNode* getMinEdge(struct newEmpGraph* g) {
+  struct vertexNode* minEdge = NULL;
+  double minWeight = __DBL_MAX__;
+  struct newEmpGraph* curr = g;
+  while (curr != NULL) {
+    struct vertexNode* destNode = curr->head;
+    int from = curr->vertexIndex;
+    while (destNode != NULL) {
+      int to = destNode->vertexIndex;
+      if (destNode->edgeWeight < minWeight && from != to) {
+        minEdge = destNode;
+        minWeight = destNode->edgeWeight;
+      }
+      destNode = destNode->nextNode;
+    }
+    curr = curr->upcomingVertex;
+  }
+  return minEdge;
+}
+
+
+struct Element {
+  int vertex;
+  struct Element *next;
+};
+
+struct Edge {
+  int terminus;
+  int source;
+  double weights;
+};
+
+struct Queue {
+  struct Element *first;
+  struct Element *last;
+};
+
+struct Queue* initializeQueue() {
+  struct Queue* queue = malloc(sizeof(struct Queue));
+  queue->first = NULL;
+  queue->last = NULL;
+  return queue;
+}
+
+void enqueue(struct Queue* structQueue, int vertex) {
+  struct Element* pElement = malloc(sizeof(struct Element));
+  pElement->vertex = vertex;
+  pElement->next = NULL;
+
+  struct Element* last = structQueue->last;
+
+  if (!last) {
+    structQueue->first = pElement;
+    structQueue->last = pElement;
+  } else {
+    structQueue->last->next = pElement;
+    structQueue->last = pElement;
+  }
+}
+
+void dequeue(struct Queue* structQueue) {
+  struct Element* pElement = structQueue->first;
+  if (structQueue->first == structQueue->last) {
+    structQueue->first = NULL;
+    structQueue->last = NULL;
+  } else {
+    structQueue->first = structQueue->first->next;
+  }
+  free(pElement);
+}
+
+void freeQueue(struct Queue* structQueue) {
+  while (structQueue->first) {
+    dequeue(structQueue);
+  }
+  free(structQueue);
+}
+
+void freeVisited(struct vertexNode* visited) {
+  struct vertexNode* curr = visited;
+  while (curr != NULL) {
+    struct vertexNode* temp = curr;
+    curr = curr->nextNode;
+    free(temp);
+  }
+}
+
+int checkVisitedVertices(struct vertexNode* visited, int vertexIndex) {
+  struct vertexNode* curr = visited;
+  while (curr != NULL) {
+    if (curr->vertexIndex == vertexIndex) {
+      return 1;
+    }
+    curr = curr->nextNode;
+  }
+  return 0;
+}
+
+
+struct vertexNode* getVertex(struct newEmpGraph* empGraph, int num) {
+  struct newEmpGraph* pEmpGraph = empGraph;
+  while (pEmpGraph != NULL) {
+    if (pEmpGraph->vertexIndex == num) {
+      return pEmpGraph->head;
+    }
+    pEmpGraph = pEmpGraph->upcomingVertex;
+  }
+  return NULL;
+}
+
+void removeEdge(struct newEmpGraph* graph, int from, int to) {
+  struct newEmpGraph* curr = graph;
+  while (curr != NULL) {
+    if (curr->vertexIndex == from) {
+      struct vertexNode* prev = NULL;
+      struct vertexNode* currNode = curr->head;
+      while (currNode != NULL) {
+        if (currNode->vertexIndex == to) {
+          if (prev == NULL) {
+            curr->head = currNode->nextNode;
+          } else {
+            prev->nextNode = currNode->nextNode;
+          }
+          free(currNode);
+          return;
+        }
+        prev = currNode;
+        currNode = currNode->nextNode;
+      }
+    }
+    curr = curr->upcomingVertex;
+  }
+}
+
+void addEdge(struct newEmpGraph** graph, int from, int to, double weight) {
+  struct newEmpGraph* curr = *graph;
+  struct vertexNode* newEdge = malloc(sizeof(struct vertexNode));
+  newEdge->vertexIndex = to;
+  newEdge->edgeWeight = weight;
+  newEdge->nextNode = NULL;
+
+  while (curr != NULL) {
+    if (curr->vertexIndex == from) {
+      if (curr->head == NULL) {
+        curr->head = newEdge;
+      } else {
+        struct vertexNode* last = curr->head;
+        while (last->nextNode != NULL) {
+          last = last->nextNode;
+        }
+        last->nextNode = newEdge;
+      }
+      return;
+    }
+    curr = curr->upcomingVertex;
+  }
+
+  struct newEmpGraph* newVertex = malloc(sizeof(struct newEmpGraph));
+  newVertex->vertexIndex = from;
+  newVertex->head = newEdge;
+  newVertex->upcomingVertex = *graph;
+  *graph = newVertex;
+}
+
+
+int isChord(struct newEmpGraph* tree, int vertexIndex, int v) {
+  struct vertexNode* visited = NULL;
+  struct vertexNode* queue = NULL;
+
+  visited = addVisited(visited, vertexIndex);
+  enqueue(&queue, vertexIndex);
+
+  while (queue != NULL) {
+    struct vertexNode* curr = getVertex(tree, queue->vertexIndex);
+    while (curr != NULL) {
+      if (curr->vertexIndex == v) {
+        freeQueue(&queue);
+        freeVisited(&visited);
+        return 1;
+      } else if (!checkVisitedVertices(visited, curr->vertexIndex)) {
+        visited = addVisited(visited, curr->vertexIndex);
+        enqueue(&queue, curr->vertexIndex);
+      }
+      curr = curr->nextNode;
+    }
+    dequeue(&queue);
+  }
+  freeQueue(&queue);
+  freeVisited(&visited);
+  return 0;
+}
+
+
+struct newEmpGraph* KruskalMST(struct newEmpGraph* mainGraph) {
+  int counter = 0;
+  struct newEmpGraph* spanningTree = NULL;
+  while (counter != vertices - 1) {
+    struct vertexNode* minEdge = getMinEdge(mainGraph);
+    removeEdge(mainGraph, minEdge->vertexIndex, minEdge->nextNode->vertexIndex);
+    if (!isChord(spanningTree, minEdge->vertexIndex, minEdge->nextNode->vertexIndex)) {
+      addEdge(&spanningTree, minEdge->vertexIndex, minEdge->nextNode->vertexIndex, minEdge->edgeWeight);
+      counter++;
+    }
+  }
+  releaseMemory(mainGraph);
+  return spanningTree;
+}
+
+void depictKruskal(int tree, struct Edge* edge, struct coordinates coordinates, double radiusOfVertex, double dtx, HDC hdc) {
+  for (int i = 0; i < tree; ++i) {
+    int terminus = edge[i].terminus;
+    int source = edge[i].source;
+
+    double weights = edge[i].weights;
+    MoveToEx(hdc, coordinates.nx[source], coordinates.ny[source], NULL);
+    LineTo(hdc, coordinates.nx[terminus], coordinates.ny[terminus]);
+
+    double x = fabs(coordinates.nx[source] + coordinates.nx[terminus]) / 2.;
+    double y = fabs(coordinates.ny[source] + coordinates.ny[terminus]) / 2.;
+
+    Ellipse(hdc, x - 10, y - 10, x + 10, y + 10);
+    wchar_t buffer[10];
+    swprintf(buffer, 5, L"%lf", weights);
+    TextOut(hdc, x - 15, y - 15, buffer, 4);
+
+  }
+
+  for (int i = 0; i < tree; i++)
+  {
+    SelectObject(hdc, GetStockObject(DC_BRUSH));
+    SetDCBrushColor(hdc, RGB(219, 56, 56));
+    int dest = edge[i].terminus;
+    Ellipse(hdc, coordinates.nx[dest] - radiusOfVertex, coordinates.ny[dest] - radiusOfVertex, coordinates.nx[dest] + radiusOfVertex, coordinates.ny[dest] + radiusOfVertex);
+    wchar_t buffer2[5];
+    swprintf(buffer2, 5, L"%d", dest + 1);
+    TextOut(hdc, coordinates.nx[dest] - dtx, coordinates.ny[dest] - radiusOfVertex / 2, buffer2, 3);
+  }
+}
+
+
+int kruskalCounter = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow) {
   WNDCLASS w;
@@ -244,14 +504,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
   HDC hdc;
   PAINTSTRUCT ps;
-  HWND Button_directed;
-  HWND Button_undirected;
+  HWND kruskalButton;
   int state = 0;
   switch (messg) {
     case WM_CREATE: {
-      Button_directed = CreateWindow(
+      kruskalButton = CreateWindow(
         (LPCSTR) "BUTTON",
-        (LPCSTR) "Switch to Directed",
+        (LPCSTR) "Next Step: Kruskal",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         700,
         30,
@@ -261,32 +520,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
         (HMENU) IDC_BUTTON,
         (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
         NULL);
-      Button_undirected = CreateWindow(
-        (LPCSTR) "BUTTON",
-        (LPCSTR) "Switch to Undirected",
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-        700,
-        600,
-        160,
-        50,
-        hWnd,
-        (HMENU) IDC_BUTTON2,
-        (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-        NULL);
       return 0;
     }
     case WM_COMMAND: {
       switch (LOWORD(wParam)) {
 
-        /*case IDC_BUTTON:
-          state = 0;
+        case IDC_BUTTON:
+          state = 1;
+          if (kruskalCounter < vertices) kruskalCounter++;
           InvalidateRect(hWnd, NULL, FALSE);
           break;
 
-        case IDC_BUTTON2:
-          state = 1;
-          InvalidateRect(hWnd, NULL, FALSE);
-          break;*/
       }
     }
     case WM_PAINT :
