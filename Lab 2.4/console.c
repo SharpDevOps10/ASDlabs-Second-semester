@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define vertices 12
-#include "props.h"
 
+#define vertices 12
+
+#include "props.h"
 
 
 void typeMatrix(double **matrix) {
@@ -24,7 +25,7 @@ void printDegrees(int *degrees) {
   printf("}\n");
 }
 
-void printVertices(int* verticesNumber) {
+void printVertices(int *verticesNumber) {
   printf("{ ");
   for (int i = 0; verticesNumber[i] != 0; ++i) {
     printf("%d ", verticesNumber[i]);
@@ -32,7 +33,7 @@ void printVertices(int* verticesNumber) {
   printf("}\n");
 }
 
-void printPathways(double** matrix) {
+/*void printPathways(double** matrix) {
   const int numbers = vertices;
   for (int i = 0; i < numbers; i++) {
     for (int j = 0; j < numbers; j++) {
@@ -42,7 +43,46 @@ void printPathways(double** matrix) {
     }
     printf("\n");
   }
+}*/
+
+void printPathwaysWith2(double **powerMatrix, double **matrix) {
+  const int numbers = vertices;
+  for (int i = 0; i < numbers; i++) {
+    for (int j = 0; j < numbers; j++) {
+      if (powerMatrix[i][j]) {
+
+        for (int e = 0; e < numbers; e++) {
+          if (matrix[i][e] && matrix[e][j]) {
+            printf("%d->%d->%d;  ", i + 1, e + 1, j + 1);
+          }
+        }
+        printf("\n");
+
+      }
+    }
+  }
 }
+
+void printPathwaysWith3(double **powerMatrix, double **matrix) {
+  const int numbers = vertices;
+  for (int i = 0; i < numbers; i++) {
+    for (int j = 0; j < numbers; j++) {
+      if (powerMatrix[i][j]) {
+
+        for (int k = 0; k < numbers; k++) {
+          for (int m = 0; m < numbers; m++) {
+            if (matrix[i][k] && matrix[k][m] && matrix[m][j]) {
+              printf("%d->%d->%d->%d;  ", i + 1, k + 1, m + 1, j + 1);
+            }
+          }
+        }
+        printf("\n");
+
+      }
+    }
+  }
+}
+
 
 void printComponents(double **matrix, int number) {
   int n = vertices;
@@ -50,7 +90,7 @@ void printComponents(double **matrix, int number) {
   for (int i = 0; i < n; i++) {
     int isNewComponent = 1;
     for (int j = 0; j < n; j++) {
-      if(matrix[i][j]) {
+      if (matrix[i][j]) {
         if (isNewComponent) printf("Component %d: [  ", componentCount);
         printf("%d  ", j + 1);
         isNewComponent = 0;
@@ -70,13 +110,12 @@ void aboutDirectedGraph() {
   double coefficient = 1.0 - 0.01 - 0.01 - 0.3;
   double **A = mulmr(coefficient, T, vertices);
 
-  int* entry = halfDegreeEntry(A);
-  int* exit = halfDegreeExit(A);
-  int* summedDegrees = summarizeHalfDegrees(exit, entry);
+  int *entry = halfDegreeEntry(A);
+  int *exit = halfDegreeExit(A);
+  int *summedDegrees = summarizeHalfDegrees(exit, entry);
 
-  int* isolated = findIsolatedVertices(summedDegrees);
-  int* terminal = findTerminalVertices(summedDegrees);
-
+  int *isolated = findIsolatedVertices(summedDegrees);
+  int *terminal = findTerminalVertices(summedDegrees);
 
 
   printf("\nThis is a Directed Graph \n");
@@ -91,7 +130,7 @@ void aboutDirectedGraph() {
   printDegrees(entry);
 
   printf("\nIs the graph homogeneous?\n");
-  if(checkHomogeneity(summedDegrees)) {
+  if (checkHomogeneity(summedDegrees)) {
     printf("%d\n", summedDegrees[0]);
   } else {
     printf("\tThe graph is not homogeneous ");
@@ -99,7 +138,7 @@ void aboutDirectedGraph() {
 
   printf("\nFind isolated vertices\n");
   printf("Isolated vertices : ");
-  if(isolated[0]) {
+  if (isolated[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo isolated vertices");
@@ -107,7 +146,7 @@ void aboutDirectedGraph() {
 
   printf("\nFind terminal vertices\n");
   printf("Terminal vertices : ");
-  if(terminal[0]) {
+  if (terminal[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo terminal vertices");
@@ -128,10 +167,10 @@ void aboutUndirectedGraph() {
   double coefficient = 1.0 - 0.01 - 0.01 - 0.3;
   double **R = randm(vertices);
   double **C = symmetricMatrix(mulmr(coefficient, R, vertices), vertices);
-  int* degree = graphDegrees(C);
+  int *degree = graphDegrees(C);
 
-  int* isolated = findIsolatedVertices(degree);
-  int* terminal = findTerminalVertices(degree);
+  int *isolated = findIsolatedVertices(degree);
+  int *terminal = findTerminalVertices(degree);
 
   printf("\nThis is a Undirected Graph \n");
   printf("\n\tMatrix for Undirected Graph\n");
@@ -141,7 +180,7 @@ void aboutUndirectedGraph() {
   printDegrees(degree);
 
   printf("\nIs the graph homogeneous?\n");
-  if(checkHomogeneity(degree)) {
+  if (checkHomogeneity(degree)) {
     printf("%d\n", degree[0]);
   } else {
     printf("\tThe graph is not homogeneous ");
@@ -149,7 +188,7 @@ void aboutUndirectedGraph() {
 
   printf("\nFind isolated vertices\n");
   printf("Isolated vertices : ");
-  if(isolated[0]) {
+  if (isolated[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo isolated vertices");
@@ -157,7 +196,7 @@ void aboutUndirectedGraph() {
 
   printf("\nFind terminal vertices\n");
   printf("Terminal vertices : ");
-  if(terminal[0]) {
+  if (terminal[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo terminal vertices");
@@ -171,22 +210,22 @@ void aboutUndirectedGraph() {
 }
 
 void aboutModifiedGraph() {
-  double** K = randm(vertices);
+  double **K = randm(vertices);
   double modifiedCoefficient = 1.0 - 0.005 - 0.005 - 0.27;
-  double** D = mulmr(modifiedCoefficient, K, vertices);
-  int* entry = halfDegreeEntry(D);
-  int* exit = halfDegreeExit(D);
-  int* summedDegrees = summarizeHalfDegrees(exit, entry);
-  double** squaredMatrix = multiplyMatrices(D,D);
-  double** cubedMatrix = multiplyMatrices(squaredMatrix, D);
+  double **D = mulmr(modifiedCoefficient, K, vertices);
+  int *entry = halfDegreeEntry(D);
+  int *exit = halfDegreeExit(D);
+  int *summedDegrees = summarizeHalfDegrees(exit, entry);
+  double **squaredMatrix = multiplyMatrices(D, D);
+  double **cubedMatrix = multiplyMatrices(squaredMatrix, D);
 
-  int* isolated = findIsolatedVertices(summedDegrees);
-  int* terminal = findTerminalVertices(summedDegrees);
+  int *isolated = findIsolatedVertices(summedDegrees);
+  int *terminal = findTerminalVertices(summedDegrees);
 
-  double** reachabilityMatrix = calculateReachabilityMatrix(D);
-  double** connectivityMatrix = strongConnectivityMatrix(reachabilityMatrix);
+  double **reachabilityMatrix = calculateReachabilityMatrix(D);
+  double **connectivityMatrix = strongConnectivityMatrix(reachabilityMatrix);
 
-  double** strongComponents = findStrongComponents(connectivityMatrix);
+  double **strongComponents = findStrongComponents(connectivityMatrix);
   printf("\nThis is a Modified Graph \n");
   printf("\n\tMatrix for Modified Graph\n");
   typeMatrix(D);
@@ -198,7 +237,7 @@ void aboutModifiedGraph() {
   printDegrees(entry);
 
   printf("\nIs the graph homogeneous?\n");
-  if(checkHomogeneity(summedDegrees)) {
+  if (checkHomogeneity(summedDegrees)) {
     printf("%d\n", summedDegrees[0]);
   } else {
     printf("\tThe graph is not homogeneous ");
@@ -206,7 +245,7 @@ void aboutModifiedGraph() {
 
   printf("\nFind isolated vertices\n");
   printf("Isolated vertices : ");
-  if(isolated[0]) {
+  if (isolated[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo isolated vertices");
@@ -214,23 +253,23 @@ void aboutModifiedGraph() {
 
   printf("\nFind terminal vertices\n");
   printf("Terminal vertices : ");
-  if(terminal[0]) {
+  if (terminal[0]) {
     printVertices(isolated);
   } else {
     printf("\tNo terminal vertices");
-  } 
+  }
 
   printf("\nMatrix squared : 2\n");
   typeMatrix(squaredMatrix);
 
   printf("\nPathways with length : 2\n");
-  printPathways(squaredMatrix);
+  printPathwaysWith2(squaredMatrix, D);
 
   printf("\nMatrix cubed : 3\n");
   typeMatrix(cubedMatrix);
 
   printf("\nPathways with length : 3\n");
-  printPathways(cubedMatrix);
+  printPathwaysWith3(cubedMatrix, D);
 
   printf("\nReachability Matrix of Mod graph\n");
   typeMatrix(reachabilityMatrix);
@@ -239,13 +278,13 @@ void aboutModifiedGraph() {
   typeMatrix(connectivityMatrix);
 
   printf("\nStrongly Connected Components of Mod Graph\n");
-  printComponents(strongComponents,vertices);
+  printComponents(strongComponents, vertices);
 
   printf("\nMatrix of Condensation Graph\n");
   condensationMatrix(strongComponents);
 
 
-  freeMatrix(D,vertices);
+  freeMatrix(D, vertices);
   freeMatrix(squaredMatrix, vertices);
   freeMatrix(cubedMatrix, vertices);
   freeMatrix(reachabilityMatrix, vertices);
